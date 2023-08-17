@@ -5,9 +5,7 @@ on:
       - VERSION
       - "src/**/*"
       - "build/**/*"
-      - ".github/workflows/**/*"
-    paths-ignore:
-      - ".github/workflows/dockerhub-description.yml"
+      - ".github/workflows/docker_build.yml"
     branches:
       - master
 jobs:

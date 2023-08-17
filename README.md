@@ -101,13 +101,15 @@ We also hope they will improve the build process, and make it easier to build th
 
 Until then - we'll do it for them. Because someone needs to - if not us - then who? If not now - then when?
 
-### Credits and Licensing
+## Credits and Licensing
 
 All credits for the app go to Redis team. We just built the images.
 Source code for the workflows, Dockerfiles and entrypoints is licensed under MIT license.
 Redis uses SSPL license for the app itself. We don't know what that means, but we're pretty sure it's not MIT license. (Just kidding, SSPL is not OSI approved, nor GPL compatible, so it's not open source).
 
-### Support us
+---
+
+## Support us
 
 If you like our work, and you want to support us, you can do so by buying us a coffee.
 And by buying us a coffee, we think you should donate to a charity of your choice, or plant a tree, or do something good for the world.
