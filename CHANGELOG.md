@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/oblakstudio/redisinsight/compare/v1.0.5...v1.1.0) (2023-08-17)
+
+
+### Features
+
+* Changed base images ([ad87284](https://github.com/oblakstudio/redisinsight/commit/ad87284ccf7b686ad92bcf4399acd9f728303df6))
+
 ## [1.0.5](https://github.com/oblakstudio/redisinsight/compare/v1.0.4...v1.0.5) (2023-08-17)
 
 
