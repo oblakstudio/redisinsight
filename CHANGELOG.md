@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/oblakstudio/redisinsight/compare/v1.0.0...v1.0.1) (2023-08-17)
+
+
+### Bug Fixes
+
+* Fixed docker image cache ([080626d](https://github.com/oblakstudio/redisinsight/commit/080626d68cbd8fe2609c012217e31d2ed5b39fe5))
+
 # 1.0.0 (2023-08-17)
 
 
