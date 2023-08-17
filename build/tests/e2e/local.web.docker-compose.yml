@@ -1,0 +1,53 @@
+version: "3.4"
+
+services:
+  e2e:
+    build:
+      context: .
+      dockerfile: e2e.Dockerfile
+    tty: true
+    volumes:
+      - ./results:/usr/src/app/results
+      - ./plugins:/usr/src/app/plugins
+      - .redisinsight-v2:/root/.redisinsight-v2
+      - ./test-data/certs:/root/certs
+      - ./test-data/ssh:/root/ssh
+      - ./remote:/root/remote
+    env_file:
+      - ./.env
+    environment:
+      TEST_FILES: $TEST_FILES
+      COMMON_URL: 'http://app:5000'
+      API_URL: 'http://app:5000/api'
+      E2E_CLOUD_DATABASE_HOST: $E2E_CLOUD_DATABASE_HOST
+      E2E_CLOUD_DATABASE_PORT: $E2E_CLOUD_DATABASE_PORT
+      E2E_CLOUD_DATABASE_PASSWORD: $E2E_CLOUD_DATABASE_PASSWORD
+      E2E_CLOUD_DATABASE_USERNAME: $E2E_CLOUD_DATABASE_USERNAME
+      E2E_CLOUD_DATABASE_NAME: $E2E_CLOUD_DATABASE_NAME
+      E2E_CLOUD_API_ACCESS_KEY: $E2E_CLOUD_API_ACCESS_KEY
+      E2E_CLOUD_API_SECRET_KEY: $E2E_CLOUD_API_SECRET_KEY
+      REMOTE_FOLDER_PATH: "/root/remote"
+    entrypoint: [
+        './upload-custom-plugins.sh',
+    ]
+    command: [
+        './wait-for-it.sh', 'redis-enterprise:12000', '-s', '-t', '120',
+        '--',
+        'npx', 'yarn', 'test:chrome:ci'
+    ]
+
+  # Redisinsight API + UI build
+  app:
+    cap_add:
+      - IPC_LOCK
+    env_file:
+      - ./.env
+    build:
+      context: ./../../
+      dockerfile: Dockerfile
+    volumes:
+      - .redisinsight-v2:/root/.redisinsight-v2
+      - ./test-data/certs:/root/certs
+      - ./test-data/ssh:/root/ssh
+    ports:
+      - 5000:5000

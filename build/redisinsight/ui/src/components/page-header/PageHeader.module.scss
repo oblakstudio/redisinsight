@@ -1,0 +1,36 @@
+@import "@elastic/eui/src/global_styling/index";
+
+.pageHeader {
+}
+
+.pageHeaderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 4px 4px 18px;
+
+  @include euiBreakpoint("m", "l", "xl") {
+    padding: 8px 14px;
+  }
+}
+
+.title {
+  font-size: 24px;
+  @include euiBreakpoint("m", "l", "xl") {
+    padding-left: 12px;
+  }
+}
+
+.logo {
+  transition: transform 0.1s linear;
+
+  &:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  img {
+    height: 28px !important;
+    width: 150px !important;
+  }
+}

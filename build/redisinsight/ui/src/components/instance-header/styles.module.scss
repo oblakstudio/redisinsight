@@ -1,0 +1,63 @@
+.container {
+  padding: 6px 16px 6px;
+  height: 70px;
+}
+
+.breadcrumbsContainer {
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  & > div {
+    display: flex;
+    &:not(:last-of-type) {
+      margin-right: 12px;
+    }
+  }
+}
+
+.tooltip {
+  max-width: 400px !important;
+}
+
+.tooltipAnchor {
+  max-width: 100%;
+
+  .infoIcon {
+    transition: color ease .3s;
+  }
+
+  &:hover {
+    .infoIcon {
+      color: currentColor;
+    }
+  }
+}
+
+.dbName {
+  display: inline-block !important;
+  overflow: hidden;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.infoIcon {
+  color: var(--euiColorMediumShade);
+}
+
+.buttonDbIndex {
+  height: 32px !important;
+}
+
+.controls {
+  height: 32px !important;
+}
+
+.input {
+  width: 60px !important;
+}
+

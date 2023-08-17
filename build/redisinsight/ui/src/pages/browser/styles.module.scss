@@ -1,0 +1,100 @@
+$breakpoint-to-hide-resize-panel: 1280px;
+
+.container {
+  height: 100%;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  padding: 0 16px;
+  height: calc(100% - 280px);
+
+  @media only screen and (min-width: 768px) {
+    max-width: calc(100vw - 60px);
+  }
+}
+
+.resizableContainer {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+.noVisible {
+  visibility: hidden;
+}
+
+.resizePanelLeft {
+  min-width: 600px;
+  :global(.euiResizablePanel__content) {
+    @media (min-width: $breakpoint-to-hide-resize-panel) {
+      padding-right: 8px;
+    }
+  }
+}
+
+.resizePanelRight {
+  min-width: 550px;
+  :global(.euiResizablePanel__content) {
+    @media (min-width: $breakpoint-to-hide-resize-panel) {
+      padding-left: 8px;
+    }
+  }
+}
+
+.fullWidth {
+  width: 100% !important;
+  min-width: 100% !important;
+  :global(.euiResizablePanel__content) {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+.keysContainer {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+
+  @media (min-width: $breakpoint-to-hide-resize-panel) {
+    display: none;
+  }
+}
+
+.keyList {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border: none !important;
+  z-index: 0;
+}
+
+.keyDetails {
+  width: 100%;
+  position: absolute !important;
+  top: 0;
+  height: 100% !important;
+  left: 100%;
+  transition: left 0.25s ease;
+  z-index: 10;
+  will-change: left;
+}
+
+.keyDetailsOpen {
+  left: 0 !important;
+
+  @media (max-width: 1123.98px) {
+    width: 100% !important;
+  }
+}
+
