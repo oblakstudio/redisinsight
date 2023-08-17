@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/oblakstudio/redisinsight/compare/v1.0.4...v1.0.5) (2023-08-17)
+
+
+### Bug Fixes
+
+* TMP dir cleanup on build complete [skip ci] ([3e85c96](https://github.com/oblakstudio/redisinsight/commit/3e85c96681d06cef9c8e584f1347c4139bcd90c1))
+
 ## [1.0.4](https://github.com/oblakstudio/redisinsight/compare/v1.0.3...v1.0.4) (2023-08-17)
 
 
