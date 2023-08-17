@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/oblakstudio/redisinsight/compare/v1.0.2...v1.0.3) (2023-08-17)
+
+
+### Bug Fixes
+
+* sha fix for docker files ([cf7505d](https://github.com/oblakstudio/redisinsight/commit/cf7505dc0f9daa81094229a8c8cf95c2f760a60d))
+
 ## [1.0.2](https://github.com/oblakstudio/redisinsight/compare/v1.0.1...v1.0.2) (2023-08-17)
 
 
