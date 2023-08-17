@@ -41,10 +41,16 @@ COPY --from=front /usr/src/app/redisinsight/api/defaults ./defaults
 RUN yarn run build:prod
 
 FROM node:18.15.0-bullseye-slim
+ENV DEBIAN_FRONTEND noninteractive
 RUN set -ex \
   && apt-get update -y
 RUN apt-get install net-tools -y
-RUN apt-get install -y dbus-x11 gnome-keyring libsecret-1-0
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+  --mount=target=/var/cache/apt,type=cache,sharing=locked \
+  rm -f /etc/apt/apt.conf.d/docker-clean \
+  && apt-get update \
+  && apt-get -y --no-install-recommends install \
+  dbus-x11 gnome-keyring libsecret-1-0
 RUN dbus-uuidgen > /var/lib/dbus/machine-id
 
 ARG NODE_ENV=production

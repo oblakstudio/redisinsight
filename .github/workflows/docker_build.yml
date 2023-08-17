@@ -70,15 +70,20 @@ jobs:
 
       - name: Export Image Digest
         run: |
-          mkdir -p /tmp/digests
+          mkdir -p /tmp/build-digest
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
+          digest="${digest#sha256:}"
+          touch "/tmp/build-digest/$digest"
+          echo "Digest is $digest"
+          echo "files in folder"
+          ls -la /tmp/build-digest
+        shell: bash
 
       - name: Upload digest
         uses: actions/upload-artifact@v3
         with:
           name: digests
-          path: /tmp/digests/*
+          path: /tmp/build-digest/*
           if-no-files-found: error
           retention-days: 1
 
@@ -92,7 +97,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: digests
-          path: /tmp/digests
+          path: /tmp/build-digest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -117,7 +122,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PAT }}
 
       - name: Create manifest list and push
-        working-directory: /tmp/digests
+        working-directory: /tmp/build-digest
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
