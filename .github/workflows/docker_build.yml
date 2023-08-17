@@ -74,9 +74,6 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           digest="${digest#sha256:}"
           touch "/tmp/build-digest/$digest"
-          echo "Digest is $digest"
-          echo "files in folder"
-          ls -la /tmp/build-digest
         shell: bash
 
       - name: Upload digest
@@ -86,6 +83,11 @@ jobs:
           path: /tmp/build-digest/*
           if-no-files-found: error
           retention-days: 1
+
+      - name: Clear temporary directory
+        run: |
+          rm -rf /tmp/build-digest
+        shell: bash
 
   merge:
     name: Merge manifest
