@@ -1,0 +1,7 @@
+# 1.0.0 (2023-08-17)
+
+
+### Features
+
+* Initial commit ([cee34f6](https://github.com/oblakstudio/redisinsight/commit/cee34f692c6f88dafc9e278c1120c63ede0a638e))
+* Update RedisInsight to 2.30.0 ([5578cdb](https://github.com/oblakstudio/redisinsight/commit/5578cdb9f6d8020c750cabb5a4ea5b90f0db7b35))
