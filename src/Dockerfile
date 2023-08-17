@@ -1,6 +1,6 @@
 FROM node:18.15.0-alpine as front
 
-LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redis-insight-docker" \
+LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redisinsight" \
   org.opencontainers.image.authors="Oblak Studio <support@oblak.studio>" \
   org.opencontainers.image.title="Redis Insight v2" \
   org.opencontainers.image.description="Docker Optimized Redis Insight v2" \
