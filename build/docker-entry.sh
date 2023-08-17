@@ -7,6 +7,19 @@
 # `docker run`
 set -e
 
+if [ -z "$STDOUT_LOGGER" ]; then
+    export STDOUT_LOGGER=true
+fi
+
+if [ -z "$FILES_LOGGER" ]; then
+    export FILES_LOGGER=false
+fi
+
+if [ -z "$GNOME_KEYRING_PASS" ]; then
+    export GNOME_KEYRING_PASS="redis-team-what-the-hell"
+fi
+
+
 # Launching system's secret storage
 eval "$(dbus-launch --sh-syntax)"
 mkdir -p ~/.cache

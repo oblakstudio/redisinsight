@@ -11,10 +11,14 @@ if [ -z "$STDOUT_LOGGER" ]; then
     export STDOUT_LOGGER=true
 fi
 
-# Check if FILES_LOGGER is not defined
 if [ -z "$FILES_LOGGER" ]; then
     export FILES_LOGGER=false
 fi
+
+if [ -z "$GNOME_KEYRING_PASS" ]; then
+    export GNOME_KEYRING_PASS="redis-team-what-the-hell-are-you-doing"
+fi
+
 
 # Launching system's secret storage
 eval "$(dbus-launch --sh-syntax)"

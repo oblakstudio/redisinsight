@@ -86,7 +86,7 @@ jobs:
 
       - name: Clear temporary directory
         run: |
-          rm -rf /tmp/build-digest
+          rm -rf /tmp/build-digest/*
         shell: bash
 
   merge:

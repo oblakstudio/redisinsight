@@ -69,7 +69,11 @@ You would imagine that a company with valuation of $2B could afford to hire a te
 
 ```bash
 $ docker pull oblakstudio/redisinsight:latest
+$ docker run -d --name redisinsight --cap-add=IPC_LOCK -p 5000 oblakstudio/redisinsight:latest
 ```
+> **Warning**
+> You need do define the IPC_LOCK capability for the container to work properly. If you don't - you will get an error on startup.
+
 
 ## Environment variables
 

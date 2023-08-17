@@ -1,6 +1,6 @@
 FROM node:18-alpine as front
 
-LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redis-insight-docker" \
+LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redisinsight" \
   org.opencontainers.image.authors="Oblak Studio <support@oblak.studio>" \
   org.opencontainers.image.title="Redis Insight v2" \
   org.opencontainers.image.description="Docker Optimized Redis Insight v2" \
@@ -40,7 +40,7 @@ COPY --from=front /usr/src/app/redisinsight/api/static ./static
 COPY --from=front /usr/src/app/redisinsight/api/defaults ./defaults
 RUN yarn run build:prod
 
-FROM node:18-bookworm-slim
+FROM node:18-slim
 ENV DEBIAN_FRONTEND noninteractive
 RUN set -ex \
   && apt-get update -y
