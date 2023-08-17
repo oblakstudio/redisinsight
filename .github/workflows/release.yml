@@ -5,6 +5,7 @@ on:
       - VERSION
       - "src/**/*"
       - "build/**/*"
+      - ".github/workflows/**/*"
     branches:
       - master
 jobs:
