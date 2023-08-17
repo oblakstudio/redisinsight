@@ -1,4 +1,4 @@
-FROM node:18.15.0-alpine as front
+FROM node:18-alpine as front
 
 LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redis-insight-docker" \
   org.opencontainers.image.authors="Oblak Studio <support@oblak.studio>" \
@@ -30,7 +30,7 @@ ENV SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
 RUN yarn build:web
 RUN yarn build:statics
 
-FROM node:18.15.0-alpine as back
+FROM node:18-alpine as back
 ENV COMMANDS_TRIGGERS_AND_FUNCTIONS_DEFAULT_URL='https://raw.githubusercontent.com/RedisGears/RedisGears/master/commands.json'
 WORKDIR /usr/src/app
 COPY redisinsight/api/package.json redisinsight/api/yarn.lock ./
@@ -40,7 +40,7 @@ COPY --from=front /usr/src/app/redisinsight/api/static ./static
 COPY --from=front /usr/src/app/redisinsight/api/defaults ./defaults
 RUN yarn run build:prod
 
-FROM node:18.15.0-bullseye-slim
+FROM node:18-bookworm-slim
 ENV DEBIAN_FRONTEND noninteractive
 RUN set -ex \
   && apt-get update -y
@@ -50,7 +50,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
   rm -f /etc/apt/apt.conf.d/docker-clean \
   && apt-get update \
   && apt-get -y --no-install-recommends install \
-  dbus-x11 gnome-keyring libsecret-1-0
+  dbus-x11 gnome-keyring libsecret-1-0 jq
 RUN dbus-uuidgen > /var/lib/dbus/machine-id
 
 ARG NODE_ENV=production
@@ -70,6 +70,7 @@ COPY --from=front /usr/src/app/redisinsight/ui/dist ./redisinsight/ui/dist
 
 # Build BE prod dependencies here to build native modules
 COPY redisinsight/api/package.json redisinsight/api/yarn.lock ./redisinsight/api/
+RUN jq 'del(.devDependencies)' redisinsight/api/package.json > tmp.json && mv tmp.json redisinsight/api/package.json
 RUN yarn --cwd ./redisinsight/api install --production
 COPY redisinsight/api/.yarnclean.prod ./redisinsight/api/.yarnclean
 RUN yarn --cwd ./redisinsight/api autoclean --force

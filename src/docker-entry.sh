@@ -7,6 +7,15 @@
 # `docker run`
 set -e
 
+if [ -z "$STDOUT_LOGGER" ]; then
+    export STDOUT_LOGGER=true
+fi
+
+# Check if FILES_LOGGER is not defined
+if [ -z "$FILES_LOGGER" ]; then
+    export FILES_LOGGER=false
+fi
+
 # Launching system's secret storage
 eval "$(dbus-launch --sh-syntax)"
 mkdir -p ~/.cache
