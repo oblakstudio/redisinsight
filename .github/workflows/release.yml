@@ -6,6 +6,8 @@ on:
       - "src/**/*"
       - "build/**/*"
       - ".github/workflows/**/*"
+    paths-ignore:
+      - ".github/workflows/dockerhub-description.yml"
     branches:
       - master
 jobs:
