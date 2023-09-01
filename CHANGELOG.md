@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/oblakstudio/redisinsight/compare/v1.1.0...v1.2.0) (2023-09-01)
+
+
+### Features
+
+* Update RedisInsight to 2.32 ([b3cf37b](https://github.com/oblakstudio/redisinsight/commit/b3cf37bdf3292cab5cd50a3f44e4046539625510))
+
 # [1.1.0](https://github.com/oblakstudio/redisinsight/compare/v1.0.5...v1.1.0) (2023-08-17)
 
 
