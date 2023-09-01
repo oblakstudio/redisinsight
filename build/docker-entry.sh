@@ -16,7 +16,7 @@ if [ -z "$FILES_LOGGER" ]; then
 fi
 
 if [ -z "$GNOME_KEYRING_PASS" ]; then
-    export GNOME_KEYRING_PASS="redis-team-what-the-hell"
+    export GNOME_KEYRING_PASS="redis-team-what-the-hell-are-you-doing"
 fi
 
 

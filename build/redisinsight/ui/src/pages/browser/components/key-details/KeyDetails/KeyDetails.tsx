@@ -29,6 +29,7 @@ import { StreamViewType } from 'uiSrc/slices/interfaces/stream'
 import { sendEventTelemetry, TelemetryEvent, getBasedOnViewTypeEvent } from 'uiSrc/telemetry'
 import { RedisResponseBuffer } from 'uiSrc/slices/interfaces'
 
+import ExploreGuides from 'uiSrc/components/explore-guides'
 import KeyDetailsHeader from '../../key-details-header/KeyDetailsHeader'
 import ZSetDetails from '../../zset-details/ZSetDetails'
 import StringDetails from '../../string-details/StringDetails'
@@ -54,10 +55,11 @@ export interface Props {
   onRemoveKey: () => void
   onEditTTL: (key: RedisResponseBuffer, ttl: number) => void
   onEditKey: (key: RedisResponseBuffer, newKey: RedisResponseBuffer, onFailure?: () => void) => void
+  totalKeys: number
 }
 
 const KeyDetails = ({ ...props }: Props) => {
-  const { onClosePanel, onRemoveKey } = props
+  const { onClosePanel, onRemoveKey, totalKeys } = props
   const { loading, error = '', data } = useSelector(selectedKeySelector)
   const { type: selectedKeyType, name: selectedKey } = useSelector(selectedKeyDataSelector) ?? {
     type: KeyTypes.String,
@@ -163,10 +165,19 @@ const KeyDetails = ({ ...props }: Props) => {
 
               <div className={styles.placeholder}>
                 <EuiText textAlign="center" grow color="subdued" size="m">
-                  <p data-testid="no-keys-selected-text">
-                    {error
-                      || 'Select the key from the list on the left to see the details of the key.'}
-                  </p>
+                  {error ? (
+                    <p data-testid="no-keys-selected-text">
+                      {error}
+                    </p>
+                  ) : (
+                    <>
+                      {totalKeys > 0 ? (
+                        <span data-testid="select-key-message">
+                          Select the key from the list on the left to see the details of the key.
+                        </span>
+                      ) : (<ExploreGuides />)}
+                    </>
+                  )}
                 </EuiText>
               </div>
             </>
