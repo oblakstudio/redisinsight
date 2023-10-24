@@ -2,7 +2,7 @@ version: '3'
 services:
   redisinsight:
     build:
-      context: ./build
+      context: ../build
       dockerfile: Dockerfile
     container_name: redisinsight
     image: oblakstudio/redisinsight:latest
