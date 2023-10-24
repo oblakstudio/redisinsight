@@ -1,0 +1,12 @@
+version: '3'
+services:
+  redisinsight:
+    build:
+      context: ./build
+      dockerfile: Dockerfile
+    container_name: redisinsight
+    image: oblakstudio/redisinsight:latest
+    ports:
+      - "5000:8001"
+    cap_add:
+      - IPC_LOCK
