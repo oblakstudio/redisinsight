@@ -1,0 +1,32 @@
+version: '3'
+services:
+  redisinsight:
+    build:
+      context: ../build
+      dockerfile: Dockerfile
+    container_name: redisinsight
+    image: oblakstudio/redisinsight:latest
+    ports:
+      - "8001:8001"
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - backend
+    depends_on:
+      - nginx
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - backend
+    depends_on:
+      - redisinsight
+
+networks:
+  backend:
+    driver: bridge
