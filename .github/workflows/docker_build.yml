@@ -89,27 +89,6 @@ jobs:
           rm -rf /tmp/build-digest/*
         shell: bash
 
-  scout:
-    name: Docker Scout
-    runs-on: ubuntu-latest
-    needs:
-      - build
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v3
-        with:
-          name: digests
-          path: /tmp/build-digest
-
-      - name: Docker Scout Action
-        id: docker-scout
-        uses: docker/scout-action@v1
-        with:
-          command: recommendations
-          image: ${{ steps.meta.outputs.tags }}
-          only-severities: critical,high
-          summary: true
-
   merge:
     name: Merge manifest
     runs-on: ubuntu-latest

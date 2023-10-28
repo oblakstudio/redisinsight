@@ -42,31 +42,21 @@ RUN yarn --cwd redisinsight/api run build:prod
 
 FROM node:18-slim
 
-ENV DEBIAN_FRONTEND noninteractive
 ENV SERVER_STATIC_CONTENT=true
 ENV BUILD_TYPE='DOCKER_ON_PREMISE'
 
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-    dbus-x11 gnome-keyring libsecret-1-0 jq \
-    && dbus-uuidgen > /var/lib/dbus/machine-id
-
-ARG NODE_ENV=production
-ARG SERVER_TLS_CERT
-ARG SERVER_TLS_KEY
-ARG SEGMENT_WRITE_KEY
-ENV SERVER_TLS_CERT=${SERVER_TLS_CERT}
-ENV SERVER_TLS_KEY=${SERVER_TLS_KEY}
-ENV SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
-
 WORKDIR /usr/src/app
+
 COPY --from=back /usr/src/app/dist ./redisinsight/api/dist
 COPY --from=front /usr/src/app/redisinsight/ui/dist ./redisinsight/ui/dist
 
-RUN rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
-
 COPY docker-entry.sh ./
-RUN chmod +x docker-entry.sh
+RUN chmod +x docker-entry.sh && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    dbus-x11 gnome-keyring libsecret-1-0 jq && \
+    dbus-uuidgen > /var/lib/dbus/machine-id && \
+    rm -rf /var/cache/apk/* /var/tmp/* /tmp/*
 
 EXPOSE 5000
 
