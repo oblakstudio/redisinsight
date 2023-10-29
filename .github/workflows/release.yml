@@ -3,7 +3,6 @@ on:
   push:
     paths:
       - VERSION
-      - "src/**/*"
       - "build/**/*"
       - ".github/workflows/docker_build.yml"
     branches:

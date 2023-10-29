@@ -26,6 +26,7 @@ get_version() {
 
 CURRENT_VERSION=$(cat VERSION)
 LATEST_VERSION=$(get_version)
+[ -z "$1" ] && SKIP_PUSH="no" || SKIP_PUSH="$1"
 
 compare_versions "$CURRENT_VERSION" "$LATEST_VERSION"
 GREATER=$?
@@ -37,8 +38,8 @@ if [[ $GREATER -eq 1 ]]; then
 fi;
 
 echo "$LATEST_VERSION" > VERSION
-
-pushd build || exit 1
+rm -rf ri-src && mkdir ri-src
+pushd ri-src  > /dev/null || exit 1
 
 curl -s https://api.github.com/repos/RedisInsight/RedisInsight/releases/latest \
 | grep "tarball_url" \
@@ -47,15 +48,18 @@ curl -s https://api.github.com/repos/RedisInsight/RedisInsight/releases/latest \
 | xargs wget -q -O - \
 | tar -xz --strip-components=1
 
-popd || exit 1
-
-rm -f build/Dockerfile
-rm -f build/docker-entry.sh
-
-cp -f src/Dockerfile build/Dockerfile
-cp -f src/docker-entry.sh build/docker-entry.sh
+popd > /dev/null || exit 1
 
 REMOTE_REPO="https://github.com/${GITHUB_REPOSITORY}.git"
+
+./.github/scripts/build.bash front back
+
+rm -rf ri-src
+
+if [ "$SKIP_PUSH" == "yes" ]; then
+  echo "Skipping push to $REMOTE_REPO"
+  exit 0
+fi
 
 git config user.name "oblakbot"
 git config user.email "sibin.grasic+bot@oblak.studio"
