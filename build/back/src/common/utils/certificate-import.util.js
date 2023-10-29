@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCertNameFromFilename = exports.getPemBodyFromFileSync = exports.isValidSshPrivateKey = exports.isValidPemPrivateKey = exports.isValidPemCertificate = void 0;
+const path_1 = require("path");
+const fs_1 = require("fs");
+const isValidPemCertificate = (cert) => cert.startsWith('-----BEGIN CERTIFICATE-----');
+exports.isValidPemCertificate = isValidPemCertificate;
+const isValidPemPrivateKey = (cert) => cert.startsWith('-----BEGIN PRIVATE KEY-----');
+exports.isValidPemPrivateKey = isValidPemPrivateKey;
+const isValidSshPrivateKey = (cert) => cert.startsWith('-----BEGIN OPENSSH PRIVATE KEY-----');
+exports.isValidSshPrivateKey = isValidSshPrivateKey;
+const getPemBodyFromFileSync = (path) => (0, fs_1.readFileSync)(path).toString('utf8');
+exports.getPemBodyFromFileSync = getPemBodyFromFileSync;
+const getCertNameFromFilename = (path) => (0, path_1.parse)(path).name;
+exports.getCertNameFromFilename = getCertNameFromFilename;
