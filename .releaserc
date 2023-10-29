@@ -1,37 +1,10 @@
 {
   "branches": [
-    "master",
-    "next"
+    "master"
   ],
   "plugins": [
-    [
-      "@semantic-release/changelog",
-      {
-        "changelogFile": "CHANGELOG.md"
-      }
-    ],
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    [
-      "@semantic-release/git",
-      {
-        "assets": [
-          "CHANGELOG.md"
-        ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-      }
-    ],
-    [
-      "@semantic-release/github",
-      {
-        "assets": [
-          {
-            "path": "/tmp/release.zip",
-            "name": "ddev-minio-${nextRelease.version}.zip",
-            "label": "DDev Minio Addon v${nextRelease.version}"
-          }
-        ]
-      }
-    ]
+    "@semantic-release/github"
   ]
 }
