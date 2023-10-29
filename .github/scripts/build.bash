@@ -90,6 +90,7 @@ if [ "$DO_BACK" == "true" ]; then
 
   popd > /dev/null 2>&1 || exit
 
+
 fi
 
 rm -rf "$TARGET_FOLDER"
@@ -97,6 +98,8 @@ mkdir -p "$TARGET_FOLDER/front" "$TARGET_FOLDER/back"
 
 cp -ar "$FRONT_FOLDER"/redisinsight/ui/dist/* "$TARGET_FOLDER/front/"
 cp -ar "$BACK_FOLDER"/dist/* "$TARGET_FOLDER/back/"
+cp "$SRC_FOLDER/redisinsight/api/.yarnclean.prod" "$TARGET_FOLDER/back/.yarnclean"
+
 
 cp "$SRC_FOLDER/redisinsight/api/package.json" "$SRC_FOLDER/redisinsight/api/yarn.lock" "$TARGET_FOLDER"
 jq 'del(.devDependencies)' "$TARGET_FOLDER/package.json" > tmp.json && mv tmp.json "$TARGET_FOLDER/package.json"

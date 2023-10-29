@@ -40,7 +40,7 @@ COPY ./build/back ./api/dist
 
 COPY build/package.json build/yarn.lock ./api/
 RUN yarn --cwd ./api install --production --frozen-lockfile
-COPY redisinsight/api/.yarnclean.prod ./api/.yarnclean
+RUN mv ./api/dist/.yarnclean ./api/
 RUN yarn --cwd ./api autoclean --force
 
 COPY ./docker-entry.sh ./
