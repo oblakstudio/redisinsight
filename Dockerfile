@@ -6,6 +6,8 @@ LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redisinsig
   org.opencontainers.image.description="Docker Optimized Redis Insight v2" \
   org.opencontainers.image.licenses="MIT"
 
+RUN mkdir /data && chown node:node /data
+
 USER node
 RUN mkdir -p /home/node/redisinsight/api && mkdir -p /home/node/redisinsight/ui && mkdir -p /home/node/.redisinsight-v2
 
@@ -27,9 +29,10 @@ FROM scratch as FINAL
 COPY --from=BACK / /
 WORKDIR /home/node/redisinsight
 
+VOLUME /data
 EXPOSE 5000
-USER node
 
+USER node
 ENV NODE_ENV=production
 ENV SERVER_STATIC_CONTENT=true
 ENV BUILD_TYPE='DOCKER_ON_PREMISE'

@@ -9,6 +9,10 @@
 
 set -e
 
+if [ -z "$APP_FOLDER_ABSOLUTE_PATH" ]; then
+    export APP_FOLDER_ABSOLUTE_PATH="/data"
+fi
+
 if [ -z "$STDOUT_LOGGER" ]; then
     export STDOUT_LOGGER=true
 fi
