@@ -1,12 +1,10 @@
 name: Release
 on:
   push:
-    paths:
-      - VERSION
-      - "build/**/*"
-      - ".github/workflows/docker_build.yml"
     branches:
       - master
+    paths-ignore:
+      - "README.md"
 jobs:
   release:
     name: Release
