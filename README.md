@@ -1,23 +1,37 @@
-# Dockerized Redis Insight (version2)
+# Dockerized Redis Insight (version 2)
 
+![GitHub release (with filter)](https://img.shields.io/github/v/release/RedisInsight/RedisInsight?label=Upstream+Version&color=D82C20)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/oblakstudio/redisinsight?label=Docker+Build&color=0049ff)
+![Docker Pulls](https://img.shields.io/docker/pulls/oblakstudio/redisinsight)
+![Maintenance](https://img.shields.io/maintenance/yes/2023)
+
+---
+
+If you want to skip all the boring and snarky details, click [**HERE**](#this-is-all-great-but-how-can-i-use-the-image) to read the instructions on using the image.
 
 ## Premise and description
 
 Redis team offers Redis Insight v2 as a standalone electron app.  
 Application is NestJS based, and can work under docker.
-They even have a nice litle [Dockerfile](build/Dockerfile) to build the app in their repo.
-Too bad, the build process is janky and it's really hard to build the image on your own.
+They even have a nice litle [Dockerfile](https://github.com/RedisInsight/RedisInsight/blob/main/Dockerfile) to containerize the app they built.
+Too bad, their Docker build process is broken, janky, and doesn't work.
 
-Well, with some voodoo magic, Docker file changes, and a bit of luck, We managed to build the image - both for x86 and ARM64. 🎉🎉🎉
+Well, with some voodoo magic, ~~Docker file changes, and a bit of luck~~, complete dockerfile rewrite and a custom build process we managed to build the image - both for x86 and ARM64. 🎉🎉🎉
 
 ## How this repo works.
 
-We check weekly for new RedisInsight releases. If there is a newer release, we copy it to our repo, and we replace the docker entrypoint and Dockerfile with our own.
-Then we build the images.
+1. We check ~~weekly~~ ~~daily~~ **hourly** for new RedisInsight releases.
+2. If there is a newer release, we copy the source code to our repo and run our own build process.
+3. If the build succeds, we commit the results to the repo, and run our own semantic-release process.
+4. We build tagged images, and push them to docker hub.
 
-We build on self-hosted runners - both for x86 and ARM64.
+> **Info**
+> 
+> We build on self-hosted runners - both for x86 and ARM64.
 
 ## Self-hosted runners? Why?
+
+### THIS EXPLANATION COVERS THE v1 BRANCH
 
 The entire application is one huge dependency hell and has a really specific and finicky build process.
 We won't even get into details, But it seems it can only compile on Ubuntu 20.04 (or 22.04) With Node JS <=18 and yarn <=1.22.
@@ -39,9 +53,14 @@ So - we decided to spin up two instances. One x86 and one arm64. And we build th
 > * Windows 7, 8.1, 10, 11
 > * MacOS - 12+ (Monterey) - Both Intel, M1 and M2  
 > 
-> We cannot guarantee it will work on your system. But it should. If it doesn't - open an issue and we'll try to help.
 
-### Why are we messing with the Dockerfile?
+We cannot guarantee it will work on your system. But it should. If it doesn't - open an issue and we'll try to help.
+
+### THIS EXPLANATION COVERS THE v2 BRANCH
+
+Since we moved the build process back to github action runners, we probably don't need the custom runners anymore, but we'll keep them for now, just in case. Because we're paranoid like that.
+
+## Why the total Dockerfile rewrite?
 
 The original Dockerfile installs avahi-daemon and libnss-mdns, which are not needed for the app to work in a dockerized environment, Redis teams uses is for some voodoo resolving of redis enterprise instances (which nobody uses anyway).
 
@@ -49,19 +68,33 @@ Usage of avahi-daemon and libnss-mdns in a dockerized environment is not recomme
 
 So - we removed them. And nothing of value was lost 🚮
 
-Additionally, they use outdated nodeJS images with pinned versions of nodeJS. We use the latest nodeJS 18 image, and we don't pin the version of nodeJS. This way, we can use the latest nodeJS version, and we don't have to update the Dockerfile every time nodeJS releases a new version.
+We also removed `gnome-keyring` and `libsecret` packages used to encrypt secrets and passwords in the redis-insight sqlite database. According to [@germanattanasio](https://github.com/germanattanasio) it's not needed in a dockerized / kubernetes environment (and we agree with him - because our parents taught us to always listen to strangers on the internet). Removing these packages also disables the need for `IPC_LOCK` capability for the container to work properly.
 
-The end result is a smaller image, with the latest nodeJS version, and without avahi-daemon and libnss-mdns.
+Removing the encryption crap enables us to run the entire app as a non-root user, which is always a good thing.  
+(When we're not saving the planet, we're all about security).
 
-### Why are we messing with the entrypoint?
+As an extra bonuse we added a anonymous volume at `/data` so if you're forgetful (like us), and you forget to map the volume to a persistent storage, you won't lose your data when you restart the container.
+
+Since nothing of value was lost with the removals, and since we're running our own build process (because a $2B company can't be bothered to fix their build process) we switched the image to use alpine instead of debian. This way we get a smaller image, and reduce the carbon footprint of the image downloads.  
+(We're all about saving the planet here at Oblak Studio).
+
+End result is:
+* Smaller image
+* No avahi-daemon
+* No libnss-mdns
+* No gnome-keyring
+* Data persistence
+
+As an added benefit, your CISO will not yell at you for running a container as root with IPC_LOCK capability.  
+(Toxic work environments are bad for your health)
+
+## Why are we messing with the entrypoint?
 
 The original entrypoint starts avahi daemon and then starts the app. We don't need avahi daemon, so we removed it from the entrypoint.
 
-Again - nothing of value was lost.
-
-Since the documentation for the app is non-existant, you wouldn't know that you need to define an env-var for the data encryption to work properly. We added that to the entrypoint - So no more `gnome-keyring-daemon: Operation not permitted` errors on startup.
-
 We've also moved the logging to STDOUT instead of a file (in a anonymous volume), so you can actually know and see what's going on with the app while it's running.
+
+Additionally, we preconfigure the app to use persistent storage as a data directory. This way you can mount a volume to that directory and persist the data between container restarts.
 
 You would imagine that a company with valuation of $2B could afford to hire a technical writer to write a few lines of documentation for their app. But no. They can't. So we have to do it for them.
 
@@ -69,32 +102,26 @@ You would imagine that a company with valuation of $2B could afford to hire a te
 
 ```bash
 $ docker pull oblakstudio/redisinsight:latest
-$ docker run -d --name redisinsight --cap-add=IPC_LOCK -p 5000 oblakstudio/redisinsight:latest
+$ docker run -d --name redisinsight -p 5000 oblakstudio/redisinsight:latest
 ```
-> **Warning**
-> You need do define the IPC_LOCK capability for the container to work properly. If you don't - you will get an error on startup.
 
-
-## Environment variables
+### Environment variables
 
 Here is the list of environment variables you can use to configure the app.
-The list is not final. You can find the full list of environment variables in the [default.ts](build/redisinsight/api/config/default.ts) file.
+The list is not final. You can find the full list of environment variables in the [default.ts]([build/redisinsight/api/config/default.ts](https://github.com/RedisInsight/RedisInsight/blob/main/redisinsight/api/config/default.ts)) and [production.ts](https://github.com/RedisInsight/RedisInsight/blob/main/redisinsight/api/config/production.ts) files.
 
 Default values with asterisk are overriden by us.
 
 | Variable        | Type      | Description                       | Default   |
 |-----------------|-----------|-----------------------------------|-----------|
 | RI_HOSTNAME     | string    | IP address or hostname to bind to | 0.0.0.0   |
+| API_PORT        | number    | Port to bind to                   | 5000      |
 | SERVER_TLS      | boolean   | Enable TLS                        | true      |
 | SERVER_TLS_CERT | string    | Path to TLS certificate file      | undefined |
 | SERVER_TLS_KEY  | string    | Path to TLS key file              | undefined |
 | LOG_LEVEL       | string    | Log level                         | info      |
 | STDOUT_LOGGER   | boolean   | Log to STDOUT                     | true*     |
 | FILES_LOGGER    | boolean   | Log to file                       | false*    |
-
-Unfortunately application binds to a hardcoded port 5000, and there is no way to change it except in the source code. But the container exposes port 5000, so you can map it to whatever port you want, or use a reverse proxy to proxy the traffic to the container.
-
-We do something like that in our [ddev-redis-insight](https://github.com/oblakstudio/ddev-redis-insight) project.
 
 ## Sugar, spice, and everything nice
 
@@ -103,7 +130,8 @@ The application itself is awesome - it is easily the best GUI for redis, and we 
 
 We also hope they will improve the build process, and make it easier to build the app on your own, or that they will provide an official docker image for the app.
 
-Until then - we'll do it for them. Because someone needs to - if not us - then who? If not now - then when?
+Until then - we'll do it for them. Because someone needs to - if not us - then who? If not now - then when?  
+(We're all about snark to snark combat - it's good for the soul)
 
 ## Credits and Licensing
 
@@ -111,12 +139,16 @@ All credits for the app go to Redis team. We just built the images.
 Source code for the workflows, Dockerfiles and entrypoints is licensed under MIT license.
 Redis uses SSPL license for the app itself. We don't know what that means, but we're pretty sure it's not MIT license. (Just kidding, SSPL is not OSI approved, nor GPL compatible, so it's not open source).
 
+Our Dockerfile, entrypoint and workflows are licensed under MIT license - with a caveat.  
+If you are affiliated with Redis / Redis Labs in any way - you're not permitted to do anything with our source code.  
+(Because their reps keep ignoring us, and we're petty like that 😇)
+
 ---
 
-## Support us
+## Support us (or don't)
 
 If you like our work, and you want to support us, you can do so by buying us a coffee.
 And by buying us a coffee, we think you should donate to a charity of your choice, or plant a tree, or do something good for the world.
 
-If you have the time though, you can check out our [GitHub organization](https://github.com/oblakstudio), see if you can find something useful there. 
-
+If you have the time though, you can check out our [GitHub organization](https://github.com/oblakstudio), see if you can find something useful there.  
+We also want to thank [Lazar Ivkovic](https://github.com/lazarivkovic) for his contribution and ideas to this project - we couldn't have done it without you, boi. 💙
