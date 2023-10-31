@@ -1,51 +1,38 @@
-FROM node:18-slim
+FROM node:18-alpine as BACK
 
 LABEL org.opencontainers.image.source="https://github.com/oblakstudio/redisinsight" \
   org.opencontainers.image.authors="Oblak Studio <support@oblak.studio>" \
   org.opencontainers.image.title="Redis Insight v2" \
   org.opencontainers.image.description="Docker Optimized Redis Insight v2" \
-  org.opencontainers.image.licenses="SSPL"
+  org.opencontainers.image.licenses="MIT"
 
-ENV DEBIAN_FRONTEND noninteractive
-RUN set -ex \
-  && apt-get update -y
-RUN apt-get install net-tools -y
-RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
-  --mount=target=/var/cache/apt,type=cache,sharing=locked \
-  rm -f /etc/apt/apt.conf.d/docker-clean \
-  && apt-get update \
-  && apt-get -y --no-install-recommends install \
-  dbus-x11 gnome-keyring libsecret-1-0 jq
-RUN dbus-uuidgen > /var/lib/dbus/machine-id
+USER node
+RUN mkdir -p /home/node/redisinsight/api && mkdir -p /home/node/redisinsight/ui && mkdir -p /home/node/.redisinsight-v2
 
-ARG NODE_ENV=production
-ARG SERVER_TLS_CERT
-ARG SERVER_TLS_KEY
-ARG SEGMENT_WRITE_KEY
-ENV SERVER_TLS_CERT=${SERVER_TLS_CERT}
-ENV SERVER_TLS_KEY=${SERVER_TLS_KEY}
-ENV SEGMENT_WRITE_KEY=${SEGMENT_WRITE_KEY}
-ENV NODE_ENV=${NODE_ENV}
-ENV SERVER_STATIC_CONTENT=true
-ENV BUILD_TYPE='DOCKER_ON_PREMISE'
-ENV COMMANDS_TRIGGERS_AND_FUNCTIONS_DEFAULT_URL='https://raw.githubusercontent.com/RedisGears/RedisGears/master/commands.json'
+WORKDIR /home/node/redisinsight
+COPY --chown=node:node ./build/front ./ui/dist
+COPY --chown=node:node ./build/back ./api/dist
+COPY --chown=node:node build/package.json build/yarn.lock ./api/
 
-RUN mkdir -p /usr/src/app/redisinsight
-RUN mkdir -p /usr/src/app/redisinsight/api
-RUN mkdir -p /usr/src/app/redisinsight/ui
-
-WORKDIR /usr/src/app/redisinsight
-COPY ./build/front ./ui/dist
-COPY ./build/back ./api/dist
-
-COPY build/package.json build/yarn.lock ./api/
+ENV NODE_ENV=production
 RUN yarn --cwd ./api install --production --frozen-lockfile
 RUN mv ./api/dist/.yarnclean ./api/
 RUN yarn --cwd ./api autoclean --force
 
-COPY ./docker-entry.sh ./
+COPY --chown=node:node ./docker-entry.sh ./
 RUN chmod +x docker-entry.sh
 
+FROM scratch as FINAL
+
+COPY --from=BACK / /
+WORKDIR /home/node/redisinsight
+
 EXPOSE 5000
+USER node
+
+ENV NODE_ENV=production
+ENV SERVER_STATIC_CONTENT=true
+ENV BUILD_TYPE='DOCKER_ON_PREMISE'
+ENV COMMANDS_TRIGGERS_AND_FUNCTIONS_DEFAULT_URL='https://raw.githubusercontent.com/RedisGears/RedisGears/master/commands.json'
 
 ENTRYPOINT ["./docker-entry.sh", "node", "api/dist/src/main"]
