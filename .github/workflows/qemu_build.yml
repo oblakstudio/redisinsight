@@ -1,6 +1,9 @@
 name: Docker builds
 
-on: 
+on:
+  push:
+    branches:
+      - qemu-builder
   workflow_dispatch:
 
 permissions:
