@@ -1,7 +1,7 @@
 Bloom filters are used to determine, with a high degree of certainty, whether an element is a member of a set.
 
 Let's create a bloom filter and configure an acceptable false positive rate for our use case.
-We can also specify an initial capacity - the size of the dataset that we expect to add to the filter. Bloom filters can be configured to expand when this capacity is reached - [see the `BF.RESERVE` documentation for details](https://oss.redis.com/redisbloom/Bloom_Commands/#bfreserve).
+We can also specify an initial capacity - the size of the dataset that we expect to add to the filter. Bloom filters can be configured to expand when this capacity is reached - [see the `BF.RESERVE` documentation for details](https://redis.io/commands/bf.reserve/).
 
 ```redis Create Filter
 BF.RESERVE bloom 0.001 100 // create new bloom filter at key “bloom” with a desired false positive rate of 0.1% (0.001) and anticipated data set size of 100 entries

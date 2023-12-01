@@ -58,7 +58,7 @@ exports.default = {
         tlsKey: process.env.SERVER_TLS_KEY,
         staticContent: !!process.env.SERVER_STATIC_CONTENT || false,
         buildType: process.env.BUILD_TYPE || 'ELECTRON',
-        appVersion: process.env.APP_VERSION || '2.34.0',
+        appVersion: process.env.APP_VERSION || '2.38.0',
         requestTimeout: parseInt(process.env.REQUEST_TIMEOUT, 10) || 25000,
         excludeRoutes: [],
         excludeAuthRoutes: [],
@@ -75,7 +75,7 @@ exports.default = {
     redis_clients: {
         idleSyncInterval: parseInt(process.env.CLIENTS_IDLE_SYNC_INTERVAL, 10) || 1000 * 60 * 60,
         maxIdleThreshold: parseInt(process.env.CLIENTS_MAX_IDLE_THRESHOLD, 10) || 1000 * 60 * 60,
-        retryTimes: parseInt(process.env.CLIENTS_RETRY_TIMES, 10) || 5,
+        retryTimes: parseInt(process.env.CLIENTS_RETRY_TIMES, 10) || 3,
         retryDelay: parseInt(process.env.CLIENTS_RETRY_DELAY, 10) || 500,
         maxRetriesPerRequest: parseInt(process.env.CLIENTS_MAX_RETRIES_PER_REQUEST, 10) || 1,
     },

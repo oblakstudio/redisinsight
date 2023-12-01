@@ -18,7 +18,7 @@ const axios_1 = require("axios");
 const utils_1 = require("../../../common/utils");
 const error_messages_1 = require("../../../constants/error-messages");
 const PATH_CONFIG = config_1.default.get('dir_path');
-const TMP_FOLDER = `${PATH_CONFIG.tmpDir}/RedisInsight-v2/custom-tutorials`;
+const TMP_FOLDER = `${PATH_CONFIG.tmpDir}/RedisInsight/custom-tutorials`;
 let CustomTutorialFsProvider = CustomTutorialFsProvider_1 = class CustomTutorialFsProvider {
     constructor() {
         this.logger = new common_1.Logger('CustomTutorialFsProvider');

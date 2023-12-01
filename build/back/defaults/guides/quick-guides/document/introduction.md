@@ -1,6 +1,6 @@
 In Redis, you can model documents using:
 *   [Hashes](https://redis.io/topics/data-types#hashes)
-*   [JSON](https://oss.redis.com/redisjson/) (Redis Stack only)
+*   [JSON](https://redis.io/docs/data-types/json/?utm_source=redis\&utm_medium=app\&utm_campaign=redisinsight_doc_guide) (Redis Stack only)
 
 **Hashes** are a collection of flat field-value pairs and a great choice for representing rows in a relational database table.
 
@@ -15,7 +15,7 @@ In the rest of this guide we'll show how you can automatically index your data, 
 
 [Redis Stack Server](https://redis.io/download) >=6.2.0-v0 \
 OR \
-[RediSearch](https://oss.redis.com/redisearch/) >=2.0 and [RedisJSON](https://oss.redis.com/redisjson/) >=2.0 \
+[RediSearch](https://redis.io/docs/interact/search-and-query/?utm_source=redis\&utm_medium=app\&utm_campaign=redisinsight_doc_guide) >=2.0 and [RedisJSON](https://redis.io/docs/data-types/json/?utm_source=redis\&utm_medium=app\&utm_campaign=redisinsight_doc_guide) >=2.0 \
 OR \
 A free Redis Stack instance on [Redis Cloud](https://redis.com/try-free/?utm_source=redis\&utm_medium=app\&utm_campaign=redisinsight_doc_guide "Redis Cloud").
 

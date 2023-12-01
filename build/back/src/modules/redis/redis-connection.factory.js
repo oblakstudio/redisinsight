@@ -100,15 +100,18 @@ let RedisConnectionFactory = class RedisConnectionFactory {
         return config;
     }
     async createStandaloneConnection(clientMetadata, database, options) {
-        var _a;
+        var _a, _b;
         let tnl;
+        let connection;
         try {
             const config = await this.getRedisOptions(clientMetadata, database, options);
+            const dbIndex = config.db > 0 && !database.sentinelMaster ? config.db : 0;
             if (database.ssh) {
                 tnl = await this.sshTunnelProvider.createTunnel(database);
             }
             return await new Promise((resolve, reject) => {
                 try {
+                    let lastError;
                     if (tnl) {
                         tnl.on('error', (error) => {
                             reject(error);
@@ -119,24 +122,36 @@ let RedisConnectionFactory = class RedisConnectionFactory {
                         config.host = tnl.serverAddress.host;
                         config.port = tnl.serverAddress.port;
                     }
-                    const connection = new ioredis_1.default({
+                    connection = new ioredis_1.default({
                         ...config,
-                        db: config.db > 0 && !database.sentinelMaster ? config.db : 0,
+                        db: 0,
                     });
                     connection.on('error', (e) => {
                         this.logger.error('Failed connection to the redis database.', e);
-                        reject(e);
+                        lastError = e;
                     });
                     connection.on('end', () => {
-                        this.logger.error(error_messages_1.default.SERVER_CLOSED_CONNECTION);
-                        reject(new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
+                        this.logger.error(error_messages_1.default.UNABLE_TO_ESTABLISH_CONNECTION, lastError);
+                        reject(lastError || new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
                     });
                     connection.on('ready', () => {
+                        lastError = null;
                         this.logger.log('Successfully connected to the redis database');
-                        resolve(connection);
+                        if (dbIndex > 0) {
+                            connection.select(dbIndex)
+                                .then(() => {
+                                (0, lodash_1.set)(connection, ['options', 'db'], dbIndex);
+                                resolve(connection);
+                            })
+                                .catch(reject);
+                        }
+                        else {
+                            resolve(connection);
+                        }
                     });
                     connection.on('reconnecting', () => {
-                        this.logger.log('Reconnecting to the redis database');
+                        lastError = null;
+                        this.logger.log(error_messages_1.default.RECONNECTING_TO_DATABASE);
                     });
                 }
                 catch (e) {
@@ -145,63 +160,119 @@ let RedisConnectionFactory = class RedisConnectionFactory {
             });
         }
         catch (e) {
-            (_a = tnl === null || tnl === void 0 ? void 0 : tnl.close) === null || _a === void 0 ? void 0 : _a.call(tnl);
+            (_a = connection === null || connection === void 0 ? void 0 : connection.disconnect) === null || _a === void 0 ? void 0 : _a.call(connection);
+            (_b = tnl === null || tnl === void 0 ? void 0 : tnl.close) === null || _b === void 0 ? void 0 : _b.call(tnl);
             throw e;
         }
     }
     async createClusterConnection(clientMetadata, database, options) {
-        const config = await this.getRedisClusterOptions(clientMetadata, database, options);
-        if (database.ssh) {
-            throw new Error('SSH is unsupported for cluster databases.');
+        var _a;
+        let connection;
+        try {
+            const config = await this.getRedisClusterOptions(clientMetadata, database, options);
+            if (database.ssh) {
+                throw new Error('SSH is unsupported for cluster databases.');
+            }
+            return await (new Promise((resolve, reject) => {
+                try {
+                    let lastError;
+                    connection = new ioredis_1.Cluster([{
+                            host: database.host,
+                            port: database.port,
+                        }].concat(database.nodes), {
+                        ...config,
+                        redisOptions: {
+                            ...config.redisOptions,
+                            db: 0,
+                        },
+                    });
+                    connection.on('error', (e) => {
+                        this.logger.error('Failed connection to the redis oss cluster', e);
+                        lastError = !(0, lodash_1.isEmpty)(e.lastNodeError) ? e.lastNodeError : e;
+                    });
+                    connection.on('end', () => {
+                        this.logger.error(error_messages_1.default.UNABLE_TO_ESTABLISH_CONNECTION, lastError);
+                        reject(lastError || new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
+                    });
+                    connection.on('ready', () => {
+                        lastError = null;
+                        this.logger.log('Successfully connected to the redis oss cluster.');
+                        if (config.redisOptions.db > 0) {
+                            connection.select(config.redisOptions.db)
+                                .then(() => {
+                                (0, lodash_1.set)(connection, ['options', 'db'], config.redisOptions.db);
+                                resolve(connection);
+                            })
+                                .catch(reject);
+                        }
+                        else {
+                            resolve(connection);
+                        }
+                    });
+                    connection.on('reconnecting', () => {
+                        lastError = null;
+                        this.logger.log(error_messages_1.default.RECONNECTING_TO_DATABASE);
+                    });
+                }
+                catch (e) {
+                    reject(e);
+                }
+            }));
         }
-        return new Promise((resolve, reject) => {
-            try {
-                const cluster = new ioredis_1.Cluster([{
-                        host: database.host,
-                        port: database.port,
-                    }].concat(database.nodes), {
-                    ...config,
-                });
-                cluster.on('error', (e) => {
-                    this.logger.error('Failed connection to the redis oss cluster', e);
-                    reject(!(0, lodash_1.isEmpty)(e.lastNodeError) ? e.lastNodeError : e);
-                });
-                cluster.on('end', () => {
-                    this.logger.error(error_messages_1.default.SERVER_CLOSED_CONNECTION);
-                    reject(new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
-                });
-                cluster.on('ready', () => {
-                    this.logger.log('Successfully connected to the redis oss cluster.');
-                    resolve(cluster);
-                });
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
+        catch (e) {
+            (_a = connection === null || connection === void 0 ? void 0 : connection.disconnect) === null || _a === void 0 ? void 0 : _a.call(connection);
+            throw e;
+        }
     }
     async createSentinelConnection(clientMetadata, database, options) {
-        const config = await this.getRedisSentinelOptions(clientMetadata, database, options);
-        return new Promise((resolve, reject) => {
-            try {
-                const client = new ioredis_1.default(config);
-                client.on('error', (e) => {
-                    this.logger.error('Failed connection to the redis oss sentinel', e);
+        var _a;
+        let connection;
+        try {
+            const config = await this.getRedisSentinelOptions(clientMetadata, database, options);
+            return await (new Promise((resolve, reject) => {
+                try {
+                    let lastError;
+                    connection = new ioredis_1.default({
+                        ...config,
+                        db: 0,
+                    });
+                    connection.on('error', (e) => {
+                        this.logger.error('Failed connection to the redis oss sentinel', e);
+                        lastError = e;
+                    });
+                    connection.on('end', () => {
+                        this.logger.error(error_messages_1.default.UNABLE_TO_ESTABLISH_CONNECTION, lastError);
+                        reject(lastError || new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
+                    });
+                    connection.on('ready', () => {
+                        lastError = null;
+                        this.logger.log('Successfully connected to the redis oss sentinel.');
+                        if (config.db > 0) {
+                            connection.select(config.db)
+                                .then(() => {
+                                (0, lodash_1.set)(connection, ['options', 'db'], config.db);
+                                resolve(connection);
+                            })
+                                .catch(reject);
+                        }
+                        else {
+                            resolve(connection);
+                        }
+                    });
+                    connection.on('reconnecting', () => {
+                        lastError = null;
+                        this.logger.log(error_messages_1.default.RECONNECTING_TO_DATABASE);
+                    });
+                }
+                catch (e) {
                     reject(e);
-                });
-                client.on('end', () => {
-                    this.logger.error(error_messages_1.default.SERVER_CLOSED_CONNECTION);
-                    reject(new common_1.InternalServerErrorException(error_messages_1.default.SERVER_CLOSED_CONNECTION));
-                });
-                client.on('ready', () => {
-                    this.logger.log('Successfully connected to the redis oss sentinel.');
-                    resolve(client);
-                });
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
+                }
+            }));
+        }
+        catch (e) {
+            (_a = connection === null || connection === void 0 ? void 0 : connection.disconnect) === null || _a === void 0 ? void 0 : _a.call(connection);
+            throw e;
+        }
     }
     async createClientAutomatically(clientMetadata, database, connectionName) {
         if (database === null || database === void 0 ? void 0 : database.sentinelMaster) {

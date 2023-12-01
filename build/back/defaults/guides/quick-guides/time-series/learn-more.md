@@ -7,9 +7,6 @@
 - [Introducing RedisTimeSeries 1.0](https://redis.com/blog/redistimeseries-ga-making-4th-dimension-truly-immersive/)
 - [Create a Real-time Vehicle Tracking System with Redis](https://redis.com/blog/create-a-real-time-vehicle-tracking-system-with-redis/)
 
-### Tutorials
-* [RedisTimeSeries tutorial](https://developer.redis.com/howtos/redistimeseries/)
-
 ### Videos
 - [Intro to RedisTimeSeries](https://www.youtube.com/watch?v=rXynFOrrd-Q)
 - [Time Series Data in Real Time with Redis Time Series Module](https://www.youtube.com/watch?v=Y2VbxNOYzVE)

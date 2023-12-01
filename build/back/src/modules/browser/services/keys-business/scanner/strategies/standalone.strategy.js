@@ -55,20 +55,21 @@ class StandaloneStrategy extends abstract_strategy_1.AbstractStrategy {
         return [node];
     }
     async scan(clientOptions, node, match, count, type) {
+        const COUNT = Math.min(2000, count);
         let fullScanned = false;
         const settings = await this.settingsService.getAppSettings('1');
         while ((node.total >= 0 || (0, lodash_1.isNull)(node.total))
             && !fullScanned
             && node.keys.length < count
             && (node.scanned < settings.scanThreshold)) {
-            let commandArgs = [`${node.cursor}`, 'MATCH', match, 'COUNT', count];
+            let commandArgs = [`${node.cursor}`, 'MATCH', match, 'COUNT', COUNT];
             if (type) {
                 commandArgs = [...commandArgs, 'TYPE', type];
             }
             const execResult = await this.redisManager.execCommand(clientOptions, browser_tool_commands_1.BrowserToolKeysCommands.Scan, [...commandArgs], null);
             const [nextCursor, keys] = execResult;
             node.cursor = parseInt(nextCursor, 10);
-            node.scanned += count;
+            node.scanned += COUNT;
             node.keys.push(...keys);
             fullScanned = node.cursor === 0;
         }

@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = require("path");
 const os = require("os");
 const homedir = process.env.APP_FOLDER_ABSOLUTE_PATH
-    || ((0, path_1.join)(os.homedir(), process.env.APP_FOLDER_NAME || '.redisinsight-v2'));
-const prevHomedir = (0, path_1.join)(os.homedir(), '.redisinsight-preview');
+    || ((0, path_1.join)(os.homedir(), process.env.APP_FOLDER_NAME || '.redisinsight-app'));
+const prevHomedir = (0, path_1.join)(os.homedir(), '.redisinsight-v2');
 exports.default = {
     dir_path: {
         homedir,

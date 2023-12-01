@@ -125,7 +125,7 @@ let RedisearchService = class RedisearchService {
                 await this.browserHistory.create(clientMetadata, (0, class_transformer_1.plainToClass)(create_browser_history_dto_1.CreateBrowserHistoryDto, { filter: { match: query, type: null }, mode: constants_2.BrowserHistoryMode.Redisearch }));
             }
             return (0, class_transformer_1.plainToClass)(dto_1.GetKeysWithDetailsResponse, {
-                cursor: limit + offset,
+                cursor: limit + offset >= total ? 0 : limit + offset,
                 total,
                 scanned: keyNames.length + offset,
                 keys: keyNames.map((name) => ({ name, type })),

@@ -1,6 +1,6 @@
 ### Documentation
-* [RediSearch](redis.io/docs/stack/search/)
-* [Creating Vector Indexes](https://github.com/RediSearch/RediSearch/blob/master/docs/Vectors.md)
+* [RediSearch](https://redis.io/docs/interact/search-and-query/)
+* [Vectors](https://redis.io/docs/interact/search-and-query/advanced-concepts/vectors/)
 
 ### Blogs
 * [Build Intelligent Apps with

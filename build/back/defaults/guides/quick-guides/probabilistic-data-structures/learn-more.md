@@ -5,13 +5,8 @@
 ### Blogs
 - [Probably and No: Redis, RedisBloom, and Bloom Filters](https://redis.com/blog/redis-redisbloom-bloom-filters/)
 - [ReBloom – Bloom Filter Datatype for Redis](https://redis.com/blog/rebloom-bloom-filter-datatype-redis/)
-- [How to Get Started with Probabilistic Data Structures: Count-Min Sketch](https://redis.com/blog/how-to-get-started-with-probabilistic-data-structures-count-min-sketch/)
 - [Count Min Sketch: The Art and Science of Estimating Stuff](https://redis.com/blog/count-min-sketch-the-art-and-science-of-estimating-stuff/)
 - [Meet Top-K: an Awesome Probabilistic Addition to RedisBloom](https://redis.com/blog/meet-top-k-awesome-probabilistic-addition-redisbloom/)
-
-### Tutorials
-* [RedisBloom Tutorial](https://developer.redis.com/howtos/redisbloom)
-* [Using RedisBloom with .NET](https://developer.redis.com/howtos/redisbloom/with-dotnet/redisbloom-withdotnet)
 
 ### Videos
 - [How to: Use Bloom Filters in Redis](https://www.youtube.com/watch?v=Z9_wrhdbSC4)

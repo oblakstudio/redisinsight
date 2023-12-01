@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnalyticsService = exports.NON_TRACKING_ANONYMOUS_ID = void 0;
+exports.AnalyticsService = exports.Telemetry = exports.NON_TRACKING_ANONYMOUS_ID = void 0;
 const common_1 = require("@nestjs/common");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const lodash_1 = require("lodash");
@@ -19,6 +19,11 @@ const config_1 = require("../../utils/config");
 const settings_service_1 = require("../settings/settings.service");
 exports.NON_TRACKING_ANONYMOUS_ID = '00000000-0000-0000-0000-000000000001';
 const ANALYTICS_CONFIG = config_1.default.get('analytics');
+var Telemetry;
+(function (Telemetry) {
+    Telemetry["Enabled"] = "enabled";
+    Telemetry["Disabled"] = "disabled";
+})(Telemetry = exports.Telemetry || (exports.Telemetry = {}));
 let AnalyticsService = class AnalyticsService {
     constructor(settingsService) {
         this.settingsService = settingsService;
@@ -53,6 +58,11 @@ let AnalyticsService = class AnalyticsService {
                     anonymousId: !isAnalyticsGranted && nonTracking ? exports.NON_TRACKING_ANONYMOUS_ID : this.anonymousId,
                     integrations: { Amplitude: { session_id: this.sessionId } },
                     event,
+                    context: {
+                        traits: {
+                            telemetry: isAnalyticsGranted ? Telemetry.Enabled : Telemetry.Disabled,
+                        }
+                    },
                     properties: {
                         ...eventData,
                         anonymousId: this.anonymousId,
@@ -76,6 +86,11 @@ let AnalyticsService = class AnalyticsService {
                     name: event,
                     anonymousId: !isAnalyticsGranted && nonTracking ? exports.NON_TRACKING_ANONYMOUS_ID : this.anonymousId,
                     integrations: { Amplitude: { session_id: this.sessionId } },
+                    context: {
+                        traits: {
+                            telemetry: isAnalyticsGranted ? Telemetry.Enabled : Telemetry.Disabled,
+                        }
+                    },
                     properties: {
                         ...eventData,
                         anonymousId: this.anonymousId,

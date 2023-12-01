@@ -36,7 +36,7 @@ let DatabaseFactory = class DatabaseFactory {
             sessionMetadata: {},
             databaseId: database.id,
             context: models_1.ClientContext.Common,
-        }, database, { useRetry: false });
+        }, database, { useRetry: true });
         if (await this.databaseInfoProvider.isSentinel(client)) {
             if (!database.sentinelMaster) {
                 throw new Error(constants_1.RedisErrorCodes.SentinelParamsRequired);
@@ -75,7 +75,7 @@ let DatabaseFactory = class DatabaseFactory {
                 sessionMetadata: {},
                 databaseId: model.id,
                 context: models_1.ClientContext.Common,
-            }, model, { useRetry: false });
+            }, model, { useRetry: true });
             const primaryNodeOptions = clusterClient.nodes('master')[0].options;
             model.host = primaryNodeOptions.host;
             model.port = primaryNodeOptions.port;
@@ -100,7 +100,7 @@ let DatabaseFactory = class DatabaseFactory {
                 sessionMetadata: {},
                 databaseId: model.id,
                 context: models_1.ClientContext.Common,
-            }, model, { useRetry: false });
+            }, model, { useRetry: true });
             model.connectionType = database_entity_1.ConnectionType.SENTINEL;
             model.nodes = selectedMaster.nodes;
             await sentinelClient.disconnect();
