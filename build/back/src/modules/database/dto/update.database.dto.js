@@ -14,9 +14,10 @@ const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const update_ssh_options_dto_1 = require("../../ssh/dto/update.ssh-options.dto");
+const update_sentinel_master_dto_1 = require("../../redis-sentinel/dto/update.sentinel.master.dto");
 const create_database_dto_1 = require("./create.database.dto");
 class UpdateDatabaseDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(create_database_dto_1.CreateDatabaseDto, [
-    'sshOptions', 'timeout',
+    'sshOptions', 'timeout', 'sentinelMaster',
 ])) {
 }
 __decorate([
@@ -59,4 +60,15 @@ __decorate([
     (0, class_validator_1.IsInt)({ always: true }),
     __metadata("design:type", Number)
 ], UpdateDatabaseDto.prototype, "timeout", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Updated sentinel master fields',
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmptyObject)(),
+    (0, class_transformer_1.Type)(() => update_sentinel_master_dto_1.UpdateSentinelMasterDto),
+    (0, class_validator_1.ValidateNested)(),
+    __metadata("design:type", update_sentinel_master_dto_1.UpdateSentinelMasterDto)
+], UpdateDatabaseDto.prototype, "sentinelMaster", void 0);
 exports.UpdateDatabaseDto = UpdateDatabaseDto;

@@ -13,6 +13,10 @@ exports.knownFeatures = {
         storage: index_1.FeatureStorage.Database,
         factory: cloud_sso_feature_flag_1.CloudSsoFeatureFlag.getFeature,
     },
+    [index_1.KnownFeatures.CloudSsoRecommendedSettings]: {
+        name: index_1.KnownFeatures.CloudSsoRecommendedSettings,
+        storage: index_1.FeatureStorage.Database,
+    },
     [index_1.KnownFeatures.RedisModuleFilter]: {
         name: index_1.KnownFeatures.RedisModuleFilter,
         storage: index_1.FeatureStorage.Database,

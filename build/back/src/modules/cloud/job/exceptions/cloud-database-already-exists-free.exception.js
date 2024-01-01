@@ -14,6 +14,8 @@ class CloudDatabaseAlreadyExistsFreeException extends common_1.HttpException {
             resource: {
                 subscriptionId: options === null || options === void 0 ? void 0 : options.subscriptionId,
                 databaseId: options === null || options === void 0 ? void 0 : options.databaseId,
+                region: options === null || options === void 0 ? void 0 : options.region,
+                provider: options === null || options === void 0 ? void 0 : options.provider,
             },
         };
         super(response, response.statusCode, options);

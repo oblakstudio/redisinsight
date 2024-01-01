@@ -11,22 +11,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FeatureFlagProvider = void 0;
 const common_1 = require("@nestjs/common");
-const insights_recommendations_flag_strategy_1 = require("./strategies/insights-recommendations.flag.strategy");
+const common_flag_strategy_1 = require("./strategies/common.flag.strategy");
 const default_flag_strategy_1 = require("./strategies/default.flag.strategy");
 const features_config_service_1 = require("../../features-config.service");
 const settings_service_1 = require("../../../settings/settings.service");
 const constants_1 = require("../../constants");
 const cloud_sso_flag_strategy_1 = require("./strategies/cloud-sso.flag.strategy");
-const simple_flag_strategy_1 = require("./strategies/simple.flag.strategy");
+const with_data_flag_strategy_1 = require("./strategies/with-data.flag.strategy");
 let FeatureFlagProvider = class FeatureFlagProvider {
     constructor(featuresConfigService, settingsService) {
         this.featuresConfigService = featuresConfigService;
         this.settingsService = settingsService;
         this.strategies = new Map();
         this.strategies.set('default', new default_flag_strategy_1.DefaultFlagStrategy(this.featuresConfigService, this.settingsService));
-        this.strategies.set(constants_1.KnownFeatures.InsightsRecommendations, new insights_recommendations_flag_strategy_1.InsightsRecommendationsFlagStrategy(this.featuresConfigService, this.settingsService));
+        this.strategies.set(constants_1.KnownFeatures.InsightsRecommendations, new common_flag_strategy_1.CommonFlagStrategy(this.featuresConfigService, this.settingsService));
         this.strategies.set(constants_1.KnownFeatures.CloudSso, new cloud_sso_flag_strategy_1.CloudSsoFlagStrategy(this.featuresConfigService, this.settingsService));
-        this.strategies.set(constants_1.KnownFeatures.RedisModuleFilter, new simple_flag_strategy_1.SimpleFlagStrategy(this.featuresConfigService, this.settingsService));
+        this.strategies.set(constants_1.KnownFeatures.CloudSsoRecommendedSettings, new common_flag_strategy_1.CommonFlagStrategy(this.featuresConfigService, this.settingsService));
+        this.strategies.set(constants_1.KnownFeatures.RedisModuleFilter, new with_data_flag_strategy_1.WithDataFlagStrategy(this.featuresConfigService, this.settingsService));
     }
     getStrategy(name) {
         return this.strategies.get(name) || this.getStrategy('default');

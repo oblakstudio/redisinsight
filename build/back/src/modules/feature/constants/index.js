@@ -25,5 +25,6 @@ var KnownFeatures;
 (function (KnownFeatures) {
     KnownFeatures["InsightsRecommendations"] = "insightsRecommendations";
     KnownFeatures["CloudSso"] = "cloudSso";
+    KnownFeatures["CloudSsoRecommendedSettings"] = "cloudSsoRecommendedSettings";
     KnownFeatures["RedisModuleFilter"] = "redisModuleFilter";
 })(KnownFeatures = exports.KnownFeatures || (exports.KnownFeatures = {}));

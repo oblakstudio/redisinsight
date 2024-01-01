@@ -9,28 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateSubscriptionAndDatabaseCloudJobDataDto = void 0;
+exports.SentinelMasterResponse = void 0;
 const swagger_1 = require("@nestjs/swagger");
-const class_validator_1 = require("class-validator");
-class CreateSubscriptionAndDatabaseCloudJobDataDto {
+const sentinel_master_1 = require("../models/sentinel-master");
+const class_transformer_1 = require("class-transformer");
+const hidden_field_decorator_1 = require("../../../common/decorators/hidden-field.decorator");
+class SentinelMasterResponse extends (0, swagger_1.OmitType)(sentinel_master_1.SentinelMaster, ['password']) {
 }
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Plan id for create a subscription.',
-        type: Number,
-    }),
-    (0, class_validator_1.ValidateIf)((object) => !object.isRecommendedSettings),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreateSubscriptionAndDatabaseCloudJobDataDto.prototype, "planId", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Use recommended settings',
+        description: 'The password for your Redis Sentinel master. '
+            + 'If your master doesn’t require a password, leave this field empty.',
         type: Boolean,
     }),
-    (0, class_validator_1.IsBoolean)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Expose)(),
+    (0, hidden_field_decorator_1.HiddenField)(true),
     __metadata("design:type", Boolean)
-], CreateSubscriptionAndDatabaseCloudJobDataDto.prototype, "isRecommendedSettings", void 0);
-exports.CreateSubscriptionAndDatabaseCloudJobDataDto = CreateSubscriptionAndDatabaseCloudJobDataDto;
+], SentinelMasterResponse.prototype, "password", void 0);
+exports.SentinelMasterResponse = SentinelMasterResponse;

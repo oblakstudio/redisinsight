@@ -36,6 +36,8 @@ class CreateFreeSubscriptionCloudJob extends cloud_job_1.CloudJob {
                 throw new exceptions_1.CloudDatabaseAlreadyExistsFreeException(undefined, {
                     subscriptionId: freeSubscription.id,
                     databaseId: databases[0].databaseId,
+                    region: freeSubscription === null || freeSubscription === void 0 ? void 0 : freeSubscription.region,
+                    provider: freeSubscription === null || freeSubscription === void 0 ? void 0 : freeSubscription.provider,
                 });
             }
             throw new cloud_subscription_already_exists_free_exception_1.CloudSubscriptionAlreadyExistsFreeException(undefined, {

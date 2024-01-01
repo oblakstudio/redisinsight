@@ -27,18 +27,21 @@ class CloudJob {
             this.options.stateCallbacks = [];
         }
         this.debounce = (0, lodash_1.debounce)(() => {
-            var _a;
-            try {
-                (((_a = this.options) === null || _a === void 0 ? void 0 : _a.stateCallbacks) || []).forEach((cb) => {
-                    var _a, _b;
-                    (_b = (_a = cb === null || cb === void 0 ? void 0 : cb(this)) === null || _a === void 0 ? void 0 : _a.catch) === null || _b === void 0 ? void 0 : _b.call(_a, () => { });
-                });
-            }
-            catch (e) {
-            }
+            this.triggerChangeStateCallbacks();
         }, 1000, {
             maxWait: 2000,
         });
+    }
+    triggerChangeStateCallbacks() {
+        var _a;
+        try {
+            (((_a = this.options) === null || _a === void 0 ? void 0 : _a.stateCallbacks) || []).forEach((cb) => {
+                var _a, _b;
+                (_b = (_a = cb === null || cb === void 0 ? void 0 : cb(this)) === null || _a === void 0 ? void 0 : _a.catch) === null || _b === void 0 ? void 0 : _b.call(_a, () => { });
+            });
+        }
+        catch (e) {
+        }
     }
     async run() {
         try {
@@ -81,8 +84,9 @@ class CloudJob {
     createChildJob(TargetJob, data, options = {}) {
         return new TargetJob({
             ...this.options,
-            stateCallbacks: [() => this.changeState()],
             ...options,
+            stateCallbacks: [() => this.changeState()],
+            child: true,
         }, data, this.dependencies);
     }
     async runChildJob(TargetJob, data, options) {
@@ -97,7 +101,12 @@ class CloudJob {
     }
     changeState(state = {}) {
         Object.entries(state).forEach(([key, value]) => { this[key] = value; });
-        this.debounce();
+        if (this.options.child) {
+            this.triggerChangeStateCallbacks();
+        }
+        else {
+            this.debounce();
+        }
     }
     checkSignal() {
         var _a, _b, _c, _d, _e;

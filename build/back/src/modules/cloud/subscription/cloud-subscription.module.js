@@ -36,6 +36,7 @@ CloudSubscriptionModule = __decorate([
         ],
         exports: [
             cloud_subscription_capi_service_1.CloudSubscriptionCapiService,
+            cloud_subscription_api_service_1.CloudSubscriptionApiService,
         ],
     })
 ], CloudSubscriptionModule);

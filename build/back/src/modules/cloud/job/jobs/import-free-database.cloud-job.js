@@ -15,9 +15,10 @@ class ImportFreeDatabaseCloudJob extends jobs_1.CloudJob {
         this.options = options;
         this.data = data;
         this.dependencies = dependencies;
-        this.name = constants_1.CloudJobName.CreateFreeDatabase;
+        this.name = constants_1.CloudJobName.ImportFreeDatabase;
     }
     async iteration() {
+        var _a, _b;
         this.logger.log('Importing free database');
         this.checkSignal();
         this.changeState({ step: models_2.CloudJobStep.Import });
@@ -45,7 +46,11 @@ class ImportFreeDatabaseCloudJob extends jobs_1.CloudJob {
             },
             timeout: cloudConfig.cloudDatabaseConnectionTimeout,
         });
-        this.result = { resourceId: database.id };
+        this.result = {
+            resourceId: database.id,
+            region: (_a = this.data) === null || _a === void 0 ? void 0 : _a.region,
+            provider: (_b = this.data) === null || _b === void 0 ? void 0 : _b.provider,
+        };
         this.changeState({ status: models_2.CloudJobStatus.Finished });
         return database;
     }

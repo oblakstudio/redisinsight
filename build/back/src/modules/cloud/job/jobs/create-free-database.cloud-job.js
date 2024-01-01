@@ -68,7 +68,11 @@ class CreateFreeDatabaseCloudJob extends jobs_1.CloudJob {
                 },
                 timeout: cloudConfig.cloudDatabaseConnectionTimeout,
             });
-            this.result = { resourceId: database.id };
+            this.result = {
+                resourceId: database.id,
+                region: freeSubscription === null || freeSubscription === void 0 ? void 0 : freeSubscription.region,
+                provider: freeSubscription === null || freeSubscription === void 0 ? void 0 : freeSubscription.provider,
+            };
             this.changeState({ status: models_2.CloudJobStatus.Finished });
             this.dependencies.cloudDatabaseAnalytics.sendCloudFreeDatabaseCreated({
                 region: (freeSubscription === null || freeSubscription === void 0 ? void 0 : freeSubscription.region) || '',

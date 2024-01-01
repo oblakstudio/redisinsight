@@ -32,4 +32,22 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
 ], ImportDatabaseCloudJobDataDto.prototype, "databaseId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Subscription region',
+        type: String,
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ImportDatabaseCloudJobDataDto.prototype, "region", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Subscription provider',
+        type: String,
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], ImportDatabaseCloudJobDataDto.prototype, "provider", void 0);
 exports.ImportDatabaseCloudJobDataDto = ImportDatabaseCloudJobDataDto;

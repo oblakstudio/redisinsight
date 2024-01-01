@@ -21,14 +21,16 @@ const exceptions_1 = require("./exceptions");
 const database_service_1 = require("../../database/database.service");
 const cloud_database_analytics_1 = require("../database/cloud-database.analytics");
 const cloud_capi_key_service_1 = require("../capi-key/cloud-capi-key.service");
+const cloud_subscription_api_service_1 = require("../subscription/cloud-subscription.api.service");
 let CloudJobFactory = class CloudJobFactory {
-    constructor(cloudDatabaseCapiService, cloudSubscriptionCapiService, cloudTaskCapiService, cloudDatabaseAnalytics, databaseService, cloudCapiKeyService) {
+    constructor(cloudDatabaseCapiService, cloudSubscriptionCapiService, cloudTaskCapiService, cloudDatabaseAnalytics, databaseService, cloudCapiKeyService, cloudSubscriptionApiService) {
         this.cloudDatabaseCapiService = cloudDatabaseCapiService;
         this.cloudSubscriptionCapiService = cloudSubscriptionCapiService;
         this.cloudTaskCapiService = cloudTaskCapiService;
         this.cloudDatabaseAnalytics = cloudDatabaseAnalytics;
         this.databaseService = databaseService;
         this.cloudCapiKeyService = cloudCapiKeyService;
+        this.cloudSubscriptionApiService = cloudSubscriptionApiService;
     }
     async create(name, data, options) {
         switch (name) {
@@ -43,6 +45,7 @@ let CloudJobFactory = class CloudJobFactory {
                     cloudDatabaseAnalytics: this.cloudDatabaseAnalytics,
                     databaseService: this.databaseService,
                     cloudCapiKeyService: this.cloudCapiKeyService,
+                    cloudSubscriptionApiService: this.cloudSubscriptionApiService,
                 });
             case constants_1.CloudJobName.CreateFreeDatabase:
                 return new create_free_database_cloud_job_1.CreateFreeDatabaseCloudJob({
@@ -80,6 +83,7 @@ CloudJobFactory = __decorate([
         cloud_task_capi_service_1.CloudTaskCapiService,
         cloud_database_analytics_1.CloudDatabaseAnalytics,
         database_service_1.DatabaseService,
-        cloud_capi_key_service_1.CloudCapiKeyService])
+        cloud_capi_key_service_1.CloudCapiKeyService,
+        cloud_subscription_api_service_1.CloudSubscriptionApiService])
 ], CloudJobFactory);
 exports.CloudJobFactory = CloudJobFactory;

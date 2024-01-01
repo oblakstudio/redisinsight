@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InsightsRecommendationsFlagStrategy = void 0;
+exports.CommonFlagStrategy = void 0;
 const feature_flag_strategy_1 = require("./feature.flag.strategy");
-class InsightsRecommendationsFlagStrategy extends feature_flag_strategy_1.FeatureFlagStrategy {
+class CommonFlagStrategy extends feature_flag_strategy_1.FeatureFlagStrategy {
     async calculate(knownFeature, featureConfig) {
         const isInRange = await this.isInTargetRange(featureConfig === null || featureConfig === void 0 ? void 0 : featureConfig.perc);
         return {
@@ -11,4 +11,4 @@ class InsightsRecommendationsFlagStrategy extends feature_flag_strategy_1.Featur
         };
     }
 }
-exports.InsightsRecommendationsFlagStrategy = InsightsRecommendationsFlagStrategy;
+exports.CommonFlagStrategy = CommonFlagStrategy;

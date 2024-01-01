@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SimpleFlagStrategy = void 0;
+exports.WithDataFlagStrategy = void 0;
 const feature_flag_strategy_1 = require("./feature.flag.strategy");
-class SimpleFlagStrategy extends feature_flag_strategy_1.FeatureFlagStrategy {
+class WithDataFlagStrategy extends feature_flag_strategy_1.FeatureFlagStrategy {
     async calculate(knownFeature, featureConfig) {
         const isInRange = await this.isInTargetRange(featureConfig === null || featureConfig === void 0 ? void 0 : featureConfig.perc);
         return {
@@ -12,4 +12,4 @@ class SimpleFlagStrategy extends feature_flag_strategy_1.FeatureFlagStrategy {
         };
     }
 }
-exports.SimpleFlagStrategy = SimpleFlagStrategy;
+exports.WithDataFlagStrategy = WithDataFlagStrategy;
