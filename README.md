@@ -3,7 +3,7 @@
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/RedisInsight/RedisInsight?label=Upstream+Version&color=D82C20)
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/oblakstudio/redisinsight?label=Docker+Build&color=0049ff)
 ![Docker Pulls](https://img.shields.io/docker/pulls/oblakstudio/redisinsight)
-![Maintenance](https://img.shields.io/maintenance/yes/2023)
+![Maintenance](https://img.shields.io/maintenance/yes/2024)
 
 ---
 
@@ -25,13 +25,14 @@ Well, with some voodoo magic, ~~Docker file changes, and a bit of luck~~, comple
 3. If the build succeds, we commit the results to the repo, and run our own semantic-release process.
 4. We build tagged images, and push them to docker hub.
 
-> **Info**
-> 
+> [!NOTE]
 > We build on self-hosted runners - both for x86 and ARM64.
 
 ## Self-hosted runners? Why?
 
-### THIS EXPLANATION COVERS THE v1 BRANCH
+<details>
+
+<summary>V1 branch information</summary>
 
 The entire application is one huge dependency hell and has a really specific and finicky build process.
 We won't even get into details, But it seems it can only compile on Ubuntu 20.04 (or 22.04) With Node JS <=18 and yarn <=1.22.
@@ -43,7 +44,7 @@ Due to another dependency hell (on frontend), yarn bugs, voodoo magic and other 
 
 So - we decided to spin up two instances. One x86 and one arm64. And we build the images there. And then we push them to docker hub.
 
-> **Warning**
+> [!IMPORTANT]
 > 
 > We tested the installation on the following platforms:
 > * Ubuntu - 20.04, 22.04
@@ -52,13 +53,18 @@ So - we decided to spin up two instances. One x86 and one arm64. And we build th
 > * AlmaLinux 8
 > * Windows 7, 8.1, 10, 11
 > * MacOS - 12+ (Monterey) - Both Intel, M1 and M2  
-> 
+>
+>We cannot guarantee it will work on your system. But it should. If it doesn't - open an issue and we'll try to help.
 
-We cannot guarantee it will work on your system. But it should. If it doesn't - open an issue and we'll try to help.
+</details>
 
-### THIS EXPLANATION COVERS THE v2 BRANCH
+<details>
+
+<summary>V2 branch information</summary>
 
 Since we moved the build process back to github action runners, we probably don't need the custom runners anymore, but we'll keep them for now, just in case. Because we're paranoid like that.
+
+</details>
 
 ## Why the total Dockerfile rewrite?
 
@@ -68,12 +74,13 @@ Usage of avahi-daemon and libnss-mdns in a dockerized environment is not recomme
 
 So - we removed them. And nothing of value was lost 🚮
 
-We also removed `gnome-keyring` and `libsecret` packages used to encrypt secrets and passwords in the redis-insight sqlite database. According to [@germanattanasio](https://github.com/germanattanasio) it's not needed in a dockerized / kubernetes environment (and we agree with him - because our parents taught us to always listen to strangers on the internet). Removing these packages also disables the need for `IPC_LOCK` capability for the container to work properly.
+We also removed `gnome-keyring` and `libsecret` packages used to encrypt secrets and passwords in the redis-insight sqlite database. According to [@germanattanasio](https://github.com/germanattanasio) it's not needed in a dockerized / kubernetes environment (and we agree with him - because our parents taught us to always listen to strangers on the internet).  
+Removing these packages also disables the need for `IPC_LOCK` capability for the container to work properly.
 
 Removing the encryption crap enables us to run the entire app as a non-root user, which is always a good thing.  
 (When we're not saving the planet, we're all about security).
 
-As an extra bonuse we added a anonymous volume at `/data` so if you're forgetful (like us), and you forget to map the volume to a persistent storage, you won't lose your data when you restart the container.
+As an extra bonus we added a anonymous volume at `/data` so if you're forgetful (like us), and you forget to map the volume to a persistent storage, you won't lose your data when you restart the container.
 
 Since nothing of value was lost with the removals, and since we're running our own build process (because a $2B company can't be bothered to fix their build process) we switched the image to use alpine instead of debian. This way we get a smaller image, and reduce the carbon footprint of the image downloads.  
 (We're all about saving the planet here at Oblak Studio).
