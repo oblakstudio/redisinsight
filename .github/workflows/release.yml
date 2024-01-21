@@ -5,6 +5,7 @@ on:
       - master
     paths-ignore:
       - "README.md"
+      - ".github/workflows/version_check.yml"
 jobs:
   release:
     name: Release

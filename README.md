@@ -16,55 +16,17 @@ Application is NestJS based, and can work under docker.
 They even have a nice litle [Dockerfile](https://github.com/RedisInsight/RedisInsight/blob/main/Dockerfile) to containerize the app they built.
 Too bad, their Docker build process is broken, janky, and doesn't work.
 
-Well, with some voodoo magic, ~~Docker file changes, and a bit of luck~~, complete dockerfile rewrite and a custom build process we managed to build the image - both for x86 and ARM64. 🎉🎉🎉
+Well, by doing ~~some voodoo magic~~, ~~Docker file changes, and a bit of luck~~ a complete dockerfile rewrite and implementing a custom build process we managed to build the image - both for x86 and ARM64. 🎉🎉🎉
 
 ## How this repo works.
 
-1. We check ~~weekly~~ ~~daily~~ **hourly** for new RedisInsight releases.
+1. We check ~~weekly~~ ~~daily~~ ~~hourly~~ **daily**  for new RedisInsight releases.
 2. If there is a newer release, we copy the source code to our repo and run our own build process.
 3. If the build succeds, we commit the results to the repo, and run our own semantic-release process.
 4. We build tagged images, and push them to docker hub.
 
 > [!NOTE]
-> We build on self-hosted runners - both for x86 and ARM64.
-
-## Self-hosted runners? Why?
-
-<details>
-
-<summary>V1 branch information</summary>
-
-The entire application is one huge dependency hell and has a really specific and finicky build process.
-We won't even get into details, But it seems it can only compile on Ubuntu 20.04 (or 22.04) With Node JS <=18 and yarn <=1.22.
-
-Most of the errors stem from the SQLite 3 libs and node-gyp bindings, which are basically unresolvable.
-If the yarn.lock file changes - the build will fail. If the nodeJS version changes - the build will fail. If the OS changes - the build will fail.
-
-Due to another dependency hell (on frontend), yarn bugs, voodoo magic and other poor architectural decisions linux/arm64 version won't compile under QEMU. We have 45+ failed builds and 2 deleted git repos (that hide our shame) to prove it.
-
-So - we decided to spin up two instances. One x86 and one arm64. And we build the images there. And then we push them to docker hub.
-
-> [!IMPORTANT]
-> 
-> We tested the installation on the following platforms:
-> * Ubuntu - 20.04, 22.04
-> * Debian - 10, 11, 12
-> * CentOS - 7, 8
-> * AlmaLinux 8
-> * Windows 7, 8.1, 10, 11
-> * MacOS - 12+ (Monterey) - Both Intel, M1 and M2  
->
->We cannot guarantee it will work on your system. But it should. If it doesn't - open an issue and we'll try to help.
-
-</details>
-
-<details>
-
-<summary>V2 branch information</summary>
-
-Since we moved the build process back to github action runners, we probably don't need the custom runners anymore, but we'll keep them for now, just in case. Because we're paranoid like that.
-
-</details>
+> We used to build on self-hosted runners - but we moved the build process back to github runners.
 
 ## Why the total Dockerfile rewrite?
 
