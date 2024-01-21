@@ -17,7 +17,7 @@ COPY --chown=node:node ./build/back ./api/dist
 COPY --chown=node:node build/package.json build/yarn.lock ./api/
 
 ENV NODE_ENV=production
-RUN yarn --cwd ./api install --production --frozen-lockfile
+RUN yarn --cwd ./api install --production --frozen-lockfile --network-timeout 600000
 RUN mv ./api/dist/.yarnclean ./api/
 RUN yarn --cwd ./api autoclean --force
 
