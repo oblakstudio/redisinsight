@@ -24,30 +24,30 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Setup Docker BuildX
-        uses: actions/cache@v4
-        id: cache
+      - name: Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v4
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-ri-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-ri
-            ${{ runner.os }}-buildx-
-
-      - name: Prepare version number
-        id: prepare
-        run: |
-          VERSION=$(git describe --always --tags)
-          if [ "${{ github.event_name }}" = "release" ]; then
-            TAGS="${{ env.REGISTRY_IMAGE }}:$VERSION,${{ env.REGISTRY_IMAGE }}:latest"
-          else
-            TAGS="${{ env.REGISTRY_IMAGE }}:$VERSION,${{ env.REGISTRY_IMAGE }}:development"
-          fi
-          echo ::set-output name=tags::${TAGS}
+          images: ${{ env.REGISTRY_IMAGE }}
+          labels: |
+            org.opencontainers.image.title=Redis Insight v2
+            org.opencontainers.image.description=Docker Optimized Redis Insight v2
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
@@ -61,19 +61,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.prepare.outputs.tags }}
-          build-args: |
-            VERSION=${{ steps.prepare.outputs.version }}
-            BUILD_DATE=${{ steps.prepare.outputs.created }}
-            GIT_REF=${{ github.sha }}
-          labels: |
-            org.opencontainers.image.title=Redis Insight v2
-            org.opencontainers.image.description=Docker Optimized Redis Insight v2
-            org.opencontainers.image.url=${{ github.event.repository.html_url }}
-            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
-            org.opencontainers.image.version=${{ steps.prepare.outputs.version }}
-            org.opencontainers.image.created=${{ steps.prepare.outputs.created }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
-            cache-from: type=local,src=/tmp/.buildx-cache
-            cache-to: type=local,dest=/tmp/.buildx-cache
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache,mode=max
