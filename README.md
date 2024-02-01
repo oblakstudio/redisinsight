@@ -71,7 +71,7 @@ You would imagine that a company with valuation of $2B could afford to hire a te
 
 ```bash
 $ docker pull oblakstudio/redisinsight:latest
-$ docker run -d --name redisinsight -p 5000 oblakstudio/redisinsight:latest
+$ docker run -d --name redisinsight -p 5540 oblakstudio/redisinsight:latest
 ```
 
 ### Environment variables
@@ -84,7 +84,7 @@ Default values with asterisk are overriden by us.
 | Variable        | Type      | Description                       | Default   |
 |-----------------|-----------|-----------------------------------|-----------|
 | RI_HOSTNAME     | string    | IP address or hostname to bind to | 0.0.0.0   |
-| API_PORT        | number    | Port to bind to                   | 5000      |
+| API_PORT        | number    | Port to bind to                   | 5540      |
 | SERVER_TLS      | boolean   | Enable TLS                        | true      |
 | SERVER_TLS_CERT | string    | Path to TLS certificate file      | undefined |
 | SERVER_TLS_KEY  | string    | Path to TLS key file              | undefined |
