@@ -68,6 +68,14 @@ __decorate([
     __metadata("design:type", String)
 ], CustomTutorialManifest.prototype, "label", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CustomTutorialManifest.prototype, "summary", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: CustomTutorialManifestArgs }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Expose)(),

@@ -12,6 +12,7 @@ const common_1 = require("@nestjs/common");
 const plain_encryption_strategy_1 = require("./strategies/plain-encryption.strategy");
 const keytar_encryption_strategy_1 = require("./strategies/keytar-encryption.strategy");
 const encryption_service_1 = require("./encryption.service");
+const key_encryption_strategy_1 = require("./strategies/key-encryption.strategy");
 let EncryptionModule = EncryptionModule_1 = class EncryptionModule {
     static register() {
         return {
@@ -19,12 +20,14 @@ let EncryptionModule = EncryptionModule_1 = class EncryptionModule {
             providers: [
                 plain_encryption_strategy_1.PlainEncryptionStrategy,
                 keytar_encryption_strategy_1.KeytarEncryptionStrategy,
+                key_encryption_strategy_1.KeyEncryptionStrategy,
                 encryption_service_1.EncryptionService,
             ],
             exports: [
                 encryption_service_1.EncryptionService,
                 plain_encryption_strategy_1.PlainEncryptionStrategy,
                 keytar_encryption_strategy_1.KeytarEncryptionStrategy,
+                key_encryption_strategy_1.KeyEncryptionStrategy,
             ],
         };
     }

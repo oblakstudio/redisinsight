@@ -16,17 +16,22 @@ const plain_encryption_strategy_1 = require("./strategies/plain-encryption.strat
 const models_1 = require("./models");
 const exceptions_1 = require("./exceptions");
 const settings_service_1 = require("../settings/settings.service");
+const key_encryption_strategy_1 = require("./strategies/key-encryption.strategy");
 let EncryptionService = class EncryptionService {
-    constructor(settingsService, keytarEncryptionStrategy, plainEncryptionStrategy) {
+    constructor(settingsService, keytarEncryptionStrategy, plainEncryptionStrategy, keyEncryptionStrategy) {
         this.settingsService = settingsService;
         this.keytarEncryptionStrategy = keytarEncryptionStrategy;
         this.plainEncryptionStrategy = plainEncryptionStrategy;
+        this.keyEncryptionStrategy = keyEncryptionStrategy;
     }
     async getAvailableEncryptionStrategies() {
         const strategies = [
             models_1.EncryptionStrategy.PLAIN,
         ];
-        if (await this.keytarEncryptionStrategy.isAvailable()) {
+        if (await this.keyEncryptionStrategy.isAvailable()) {
+            strategies.push(models_1.EncryptionStrategy.KEY);
+        }
+        else if (await this.keytarEncryptionStrategy.isAvailable()) {
             strategies.push(models_1.EncryptionStrategy.KEYTAR);
         }
         return strategies;
@@ -36,6 +41,9 @@ let EncryptionService = class EncryptionService {
         const settings = await this.settingsService.getAppSettings('1');
         switch ((_a = settings.agreements) === null || _a === void 0 ? void 0 : _a.encryption) {
             case true:
+                if (await this.keyEncryptionStrategy.isAvailable()) {
+                    return this.keyEncryptionStrategy;
+                }
                 return this.keytarEncryptionStrategy;
             case false:
                 return this.plainEncryptionStrategy;
@@ -59,6 +67,7 @@ EncryptionService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [settings_service_1.SettingsService,
         keytar_encryption_strategy_1.KeytarEncryptionStrategy,
-        plain_encryption_strategy_1.PlainEncryptionStrategy])
+        plain_encryption_strategy_1.PlainEncryptionStrategy,
+        key_encryption_strategy_1.KeyEncryptionStrategy])
 ], EncryptionService);
 exports.EncryptionService = EncryptionService;

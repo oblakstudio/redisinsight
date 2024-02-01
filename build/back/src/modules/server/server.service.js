@@ -58,7 +58,7 @@ let ServerService = ServerService_1 = class ServerService {
                     appVersion: SERVER_CONFIG.appVersion,
                     osPlatform: process.platform,
                     buildType: SERVER_CONFIG.buildType,
-                    port: process.env.API_PORT || SERVER_CONFIG.port,
+                    port: SERVER_CONFIG.port,
                 },
                 nonTracking: true,
             });

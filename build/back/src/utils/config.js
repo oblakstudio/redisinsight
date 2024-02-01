@@ -25,7 +25,7 @@ switch (process.env.NODE_ENV) {
         break;
 }
 let buildTypeConfig;
-switch (process.env.BUILD_TYPE) {
+switch (process.env.RI_BUILD_TYPE) {
     case 'REDIS_STACK':
         buildTypeConfig = stack_1.default;
         break;
@@ -34,7 +34,7 @@ switch (process.env.BUILD_TYPE) {
         break;
 }
 (0, lodash_1.merge)(config, envConfig, buildTypeConfig);
-const get = (key) => (key ? config[key] : config);
+const get = (key) => key ? config[key] : config;
 exports.get = get;
 exports.default = {
     get: exports.get,

@@ -13,6 +13,7 @@ exports.UploadCustomTutorialDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const nestjs_form_data_1 = require("nestjs-form-data");
+const decorators_1 = require("../../../common/decorators");
 class UploadCustomTutorialDto {
 }
 __decorate([
@@ -35,6 +36,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, decorators_1.IsGitHubLink)(),
     __metadata("design:type", String)
 ], UploadCustomTutorialDto.prototype, "link", void 0);
 exports.UploadCustomTutorialDto = UploadCustomTutorialDto;

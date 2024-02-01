@@ -14,7 +14,6 @@ const config_1 = require("../../utils/config");
 const auto_updated_statics_provider_1 = require("./providers/auto-updated-statics.provider");
 const SERVER_CONFIG = config_1.default.get('server');
 const PATH_CONFIG = config_1.default.get('dir_path');
-const GUIDES_CONFIG = config_1.default.get('guides');
 const TUTORIALS_CONFIG = config_1.default.get('tutorials');
 const CONTENT_CONFIG = config_1.default.get('content');
 let StaticsManagementModule = class StaticsManagementModule {
@@ -22,13 +21,6 @@ let StaticsManagementModule = class StaticsManagementModule {
 StaticsManagementModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            serve_static_1.ServeStaticModule.forRoot({
-                serveRoot: SERVER_CONFIG.guidesUri,
-                rootPath: (0, path_1.join)(PATH_CONFIG.guides),
-                serveStaticOptions: {
-                    fallthrough: false,
-                },
-            }),
             serve_static_1.ServeStaticModule.forRoot({
                 serveRoot: SERVER_CONFIG.tutorialsUri,
                 rootPath: (0, path_1.join)(PATH_CONFIG.tutorials),
@@ -73,15 +65,6 @@ StaticsManagementModule = __decorate([
             }),
         ],
         providers: [
-            {
-                provide: 'GuidesProvider',
-                useFactory: () => new auto_updated_statics_provider_1.AutoUpdatedStaticsProvider({
-                    name: 'GuidesProvider',
-                    destinationPath: PATH_CONFIG.guides,
-                    defaultSourcePath: PATH_CONFIG.defaultGuides,
-                    ...GUIDES_CONFIG,
-                }),
-            },
             {
                 provide: 'TutorialsProvider',
                 useFactory: () => new auto_updated_statics_provider_1.AutoUpdatedStaticsProvider({

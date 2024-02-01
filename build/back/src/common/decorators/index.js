@@ -19,3 +19,4 @@ __exportStar(require("./client-metadata"), exports);
 __exportStar(require("./object-as-map.decorator"), exports);
 __exportStar(require("./is-multi-number.decorator"), exports);
 __exportStar(require("./is-bigger-than.decorator"), exports);
+__exportStar(require("./is-github-link.decorator"), exports);

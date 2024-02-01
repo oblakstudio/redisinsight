@@ -13,7 +13,6 @@ exports.BulkImportService = void 0;
 const path_1 = require("path");
 const fs = require("fs-extra");
 const common_1 = require("@nestjs/common");
-const stream_1 = require("stream");
 const readline = require("readline");
 const utils_1 = require("../../common/utils");
 const database_connection_service_1 = require("../database/database-connection.service");
@@ -64,7 +63,7 @@ let BulkImportService = class BulkImportService {
         }
         return result;
     }
-    async import(clientMetadata, dto) {
+    async import(clientMetadata, fileStream) {
         const startTime = Date.now();
         const result = {
             id: 'empty',
@@ -86,16 +85,17 @@ let BulkImportService = class BulkImportService {
         let client;
         try {
             client = await this.databaseConnectionService.createClient(clientMetadata);
-            const stream = stream_1.Readable.from(dto.file.buffer);
             let batch = [];
             const batchResults = [];
-            await new Promise((res) => {
-                const rl = readline.createInterface(stream);
-                rl.on('line', (line) => {
+            try {
+                const rl = readline.createInterface({
+                    input: fileStream,
+                });
+                for await (const line of rl) {
                     try {
                         const [command, ...args] = (0, cli_helper_1.splitCliCommandLine)((line.trim()));
                         if (batch.length >= BATCH_LIMIT) {
-                            batchResults.push(this.executeBatch(client, batch));
+                            batchResults.push(await this.executeBatch(client, batch));
                             batch = [];
                         }
                         if (command) {
@@ -105,19 +105,15 @@ let BulkImportService = class BulkImportService {
                     catch (e) {
                         parseErrors += 1;
                     }
-                });
-                rl.on('error', (error) => {
-                    result.summary.errors.push(error);
-                    result.status = constants_1.BulkActionStatus.Failed;
-                    this.analyticsService.sendActionFailed(result, error);
-                    res(null);
-                });
-                rl.on('close', () => {
-                    batchResults.push(this.executeBatch(client, batch));
-                    res(null);
-                });
-            });
-            (await Promise.all(batchResults)).forEach((batchResult) => {
+                }
+            }
+            catch (e) {
+                result.summary.errors.push(e);
+                result.status = constants_1.BulkActionStatus.Failed;
+                this.analyticsService.sendActionFailed(result, e);
+            }
+            batchResults.push(await this.executeBatch(client, batch));
+            batchResults.forEach((batchResult) => {
                 result.summary.processed += batchResult.getOverview().processed;
                 result.summary.succeed += batchResult.getOverview().succeed;
                 result.summary.failed += batchResult.getOverview().failed;
@@ -140,7 +136,6 @@ let BulkImportService = class BulkImportService {
         }
     }
     async uploadFromTutorial(clientMetadata, dto) {
-        var _a;
         try {
             const filePath = (0, path_1.join)(dto.path);
             const staticPath = (0, path_1.join)(SERVER_CONFIG.base, SERVER_CONFIG.staticUri);
@@ -152,13 +147,7 @@ let BulkImportService = class BulkImportService {
             if (!path.startsWith(PATH_CONFIG.homedir) || !await fs.pathExists(path)) {
                 throw new common_1.BadRequestException('Data file was not found');
             }
-            if (((_a = (await fs.stat(path))) === null || _a === void 0 ? void 0 : _a.size) > 100 * 1024 * 1024) {
-                throw new common_1.BadRequestException('Maximum file size is 100MB');
-            }
-            const buffer = await fs.readFile(path);
-            return this.import(clientMetadata, {
-                file: { buffer },
-            });
+            return this.import(clientMetadata, fs.createReadStream(path));
         }
         catch (e) {
             this.logger.error('Unable to process an import file path from tutorial', e);

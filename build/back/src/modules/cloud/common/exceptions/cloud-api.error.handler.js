@@ -13,7 +13,7 @@ const wrapCloudApiError = (error, message) => {
     }
     const { response } = error;
     if (response) {
-        const errorOptions = { cause: response === null || response === void 0 ? void 0 : response.data };
+        const errorOptions = { cause: new Error(response === null || response === void 0 ? void 0 : response.data) };
         switch (response === null || response === void 0 ? void 0 : response.status) {
             case 401:
                 return new cloud_api_unauthorized_exception_1.CloudApiUnauthorizedException(message, errorOptions);

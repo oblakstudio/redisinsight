@@ -13,19 +13,18 @@ const window_auth_adapter_1 = require("./modules/auth/window-auth/adapters/windo
 const app_module_1 = require("./app.module");
 const swagger_2 = require("../config/swagger");
 const logger_1 = require("../config/logger");
+const createHttpOptions_1 = require("./utils/createHttpOptions");
 const serverConfig = (0, utils_1.get)('server');
-async function bootstrap() {
+async function bootstrap(apiPort) {
     await (0, init_helper_1.migrateHomeFolder)();
-    const port = process.env.API_PORT || serverConfig.port;
+    await (0, init_helper_1.removeGuidesFolder)();
+    const { port, host } = serverConfig;
     const logger = nest_winston_1.WinstonModule.createLogger(logger_1.default);
     const options = {
         logger,
     };
-    if (serverConfig.tls && serverConfig.tlsCert && serverConfig.tlsKey) {
-        options.httpsOptions = {
-            key: JSON.parse(`"${serverConfig.tlsKey}"`),
-            cert: JSON.parse(`"${serverConfig.tlsCert}"`),
-        };
+    if (serverConfig.tlsCert && serverConfig.tlsKey) {
+        options.httpsOptions = await (0, createHttpOptions_1.createHttpOptions)(serverConfig);
     }
     const app = await core_1.NestFactory.create(app_module_1.AppModule, options);
     app.useGlobalFilters(new global_exception_filter_1.GlobalExceptionFilter(app.getHttpAdapter()));
@@ -33,7 +32,7 @@ async function bootstrap() {
     app.use(bodyParser.urlencoded({ limit: '512mb', extended: true }));
     app.enableCors();
     app.setGlobalPrefix(serverConfig.globalPrefix);
-    if (process.env.APP_ENV !== 'electron') {
+    if (process.env.RI_APP_TYPE !== 'electron') {
         swagger_1.SwaggerModule.setup(serverConfig.docPrefix, app, swagger_1.SwaggerModule.createDocument(app, swagger_2.default), {
             swaggerOptions: {
                 docExpansion: 'none',
@@ -46,9 +45,9 @@ async function bootstrap() {
         app.useWebSocketAdapter(new window_auth_adapter_1.WindowsAuthAdapter(app));
     }
     const logFileProvider = app.get(log_file_provider_1.LogFileProvider);
-    await app.listen(port, serverConfig.listenInterface);
+    await app.listen(apiPort || port, host);
     logger.log({
-        message: `Server is running on http(s)://localhost:${port}`,
+        message: `Server is running on http(s)://${host}:${port}`,
         context: 'bootstrap',
     });
     const gracefulShutdown = (signal) => {
@@ -65,6 +64,6 @@ async function bootstrap() {
     return { app, gracefulShutdown };
 }
 exports.default = bootstrap;
-if (process.env.APP_ENV !== 'electron') {
+if (process.env.RI_APP_TYPE !== 'electron') {
     bootstrap();
 }

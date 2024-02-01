@@ -51,7 +51,7 @@ let AnalyticsService = class AnalyticsService {
     }
     async sendEvent(payload) {
         try {
-            const { event, eventData, nonTracking } = payload;
+            const { event, eventData, nonTracking, traits = {}, } = payload;
             const isAnalyticsGranted = await this.checkIsAnalyticsGranted();
             if (isAnalyticsGranted || nonTracking) {
                 this.analytics.track({
@@ -60,8 +60,9 @@ let AnalyticsService = class AnalyticsService {
                     event,
                     context: {
                         traits: {
+                            ...traits,
                             telemetry: isAnalyticsGranted ? Telemetry.Enabled : Telemetry.Disabled,
-                        }
+                        },
                     },
                     properties: {
                         ...eventData,
@@ -79,7 +80,7 @@ let AnalyticsService = class AnalyticsService {
     }
     async sendPage(payload) {
         try {
-            const { event, eventData, nonTracking } = payload;
+            const { event, eventData, nonTracking, traits = {}, } = payload;
             const isAnalyticsGranted = await this.checkIsAnalyticsGranted();
             if (isAnalyticsGranted || nonTracking) {
                 this.analytics.page({
@@ -88,8 +89,9 @@ let AnalyticsService = class AnalyticsService {
                     integrations: { Amplitude: { session_id: this.sessionId } },
                     context: {
                         traits: {
+                            ...traits,
                             telemetry: isAnalyticsGranted ? Telemetry.Enabled : Telemetry.Disabled,
-                        }
+                        },
                     },
                     properties: {
                         ...eventData,

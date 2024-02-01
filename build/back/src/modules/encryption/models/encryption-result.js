@@ -5,6 +5,7 @@ var EncryptionStrategy;
 (function (EncryptionStrategy) {
     EncryptionStrategy["PLAIN"] = "PLAIN";
     EncryptionStrategy["KEYTAR"] = "KEYTAR";
+    EncryptionStrategy["KEY"] = "KEY";
 })(EncryptionStrategy = exports.EncryptionStrategy || (exports.EncryptionStrategy = {}));
 class EncryptionResult {
 }

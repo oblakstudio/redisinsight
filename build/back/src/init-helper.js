@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.migrateHomeFolder = void 0;
+exports.removeGuidesFolder = exports.migrateHomeFolder = void 0;
 const fs = require("fs-extra");
 const path_1 = require("path");
 const config_1 = require("./utils/config");
@@ -26,3 +26,13 @@ const migrateHomeFolder = async () => {
     }
 };
 exports.migrateHomeFolder = migrateHomeFolder;
+const removeGuidesFolder = async () => {
+    try {
+        if (await fs.pathExists(PATH_CONFIG.guides)) {
+            await fs.rm(PATH_CONFIG.guides, { recursive: true, force: true });
+        }
+    }
+    catch (e) {
+    }
+};
+exports.removeGuidesFolder = removeGuidesFolder;

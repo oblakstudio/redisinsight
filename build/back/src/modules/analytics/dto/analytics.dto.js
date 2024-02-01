@@ -16,6 +16,7 @@ class SendEventDto {
     constructor() {
         this.eventData = {};
         this.nonTracking = false;
+        this.traits = {};
     }
 }
 __decorate([
@@ -49,4 +50,14 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], SendEventDto.prototype, "nonTracking", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'User data.',
+        type: Object,
+        example: { telemetry: true },
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    __metadata("design:type", Object)
+], SendEventDto.prototype, "traits", void 0);
 exports.SendEventDto = SendEventDto;

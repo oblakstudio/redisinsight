@@ -16,6 +16,7 @@ const AGREEMENTS_SPEC = require("../../constants/agreements-spec.json");
 const config_1 = require("../../utils/config");
 const constants_1 = require("../../constants");
 const keytar_encryption_strategy_1 = require("../encryption/strategies/keytar-encryption.strategy");
+const key_encryption_strategy_1 = require("../encryption/strategies/key-encryption.strategy");
 const settings_analytics_1 = require("./settings.analytics");
 const settings_repository_1 = require("./repositories/settings.repository");
 const utils_1 = require("../../utils");
@@ -25,11 +26,12 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const settings_dto_1 = require("./dto/settings.dto");
 const SERVER_CONFIG = config_1.default.get('server');
 let SettingsService = class SettingsService {
-    constructor(settingsRepository, agreementRepository, analytics, keytarEncryptionStrategy, eventEmitter) {
+    constructor(settingsRepository, agreementRepository, analytics, keytarEncryptionStrategy, keyEncryptionStrategy, eventEmitter) {
         this.settingsRepository = settingsRepository;
         this.agreementRepository = agreementRepository;
         this.analytics = analytics;
         this.keytarEncryptionStrategy = keytarEncryptionStrategy;
+        this.keyEncryptionStrategy = keyEncryptionStrategy;
         this.eventEmitter = eventEmitter;
         this.logger = new common_1.Logger('SettingsService');
     }
@@ -89,7 +91,8 @@ let SettingsService = class SettingsService {
     async getAgreementsOption(checker, defaultOption) {
         try {
             if (checker === 'KEYTAR') {
-                const isEncryptionAvailable = await this.keytarEncryptionStrategy.isAvailable();
+                const isEncryptionAvailable = await this.keyEncryptionStrategy.isAvailable()
+                    || await this.keytarEncryptionStrategy.isAvailable();
                 if (!isEncryptionAvailable && SERVER_CONFIG.buildType === 'REDIS_STACK') {
                     return 'stack_false';
                 }
@@ -139,6 +142,7 @@ SettingsService = __decorate([
         agreements_repository_1.AgreementsRepository,
         settings_analytics_1.SettingsAnalytics,
         keytar_encryption_strategy_1.KeytarEncryptionStrategy,
+        key_encryption_strategy_1.KeyEncryptionStrategy,
         event_emitter_1.EventEmitter2])
 ], SettingsService);
 exports.SettingsService = SettingsService;

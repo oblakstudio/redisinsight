@@ -14,11 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkImportController = void 0;
 const common_1 = require("@nestjs/common");
+const Busboy = require("busboy");
 const swagger_1 = require("@nestjs/swagger");
 const api_endpoint_decorator_1 = require("../../decorators/api-endpoint.decorator");
-const nestjs_form_data_1 = require("nestjs-form-data");
 const bulk_import_service_1 = require("./bulk-import.service");
-const upload_import_file_dto_1 = require("./dto/upload-import-file.dto");
 const decorators_1 = require("../../common/decorators");
 const models_1 = require("../../common/models");
 const upload_import_file_by_path_dto_1 = require("./dto/upload-import-file-by-path.dto");
@@ -26,8 +25,14 @@ let BulkImportController = class BulkImportController {
     constructor(service) {
         this.service = service;
     }
-    async import(dto, clientMetadata) {
-        return this.service.import(clientMetadata, dto);
+    async import(req, clientMetadata) {
+        return new Promise((res, rej) => {
+            const busboy = Busboy({ headers: req.headers });
+            busboy.on('file', (_fieldName, fileStream) => {
+                this.service.import(clientMetadata, fileStream).then(res).catch(rej);
+            });
+            req.pipe(busboy);
+        });
     }
     async uploadFromTutorial(dto, clientMetadata) {
         return this.service.uploadFromTutorial(clientMetadata, dto);
@@ -37,7 +42,6 @@ __decorate([
     (0, common_1.Post)('import'),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.HttpCode)(200),
-    (0, nestjs_form_data_1.FormDataRequest)(),
     (0, api_endpoint_decorator_1.ApiEndpoint)({
         description: 'Import data from file',
         responses: [
@@ -46,11 +50,10 @@ __decorate([
             },
         ],
     }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, decorators_1.ClientMetadataParam)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [upload_import_file_dto_1.UploadImportFileDto,
-        models_1.ClientMetadata]),
+    __metadata("design:paramtypes", [Object, models_1.ClientMetadata]),
     __metadata("design:returntype", Promise)
 ], BulkImportController.prototype, "import", null);
 __decorate([

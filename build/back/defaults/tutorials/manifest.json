@@ -9,42 +9,390 @@
   "children": [
     {
       "type": "group",
-      "id": "redis_stack",
-      "label": "Redis Stack",
+      "id": "ds",
+      "label": "Data structures explained",
+      "args": {
+        "initialIsOpen": false
+      },
+      "children": [
+        {
+          "type": "group",
+          "id": "ds-json",
+          "label": "JSON",
+          "args": {
+            "initialIsOpen": false
+          },
+          "children": [
+            {
+              "type": "internal-link",
+              "id": "ds-json-intro",
+              "label": "Introduction",
+              "summary": "A Redis JSON is a Redis data structure for storing, querying, and manipulating a single JSON document.",
+              "args": {
+                "path": "/ds/json/intro.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-create",
+              "label": "Create documents",
+              "args": {
+                "path": "/ds/json/create.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-modify",
+              "label": "Modify documents",
+              "args": {
+                "path": "/ds/json/modify.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-arrays",
+              "label": "Use JSON arrays",
+              "args": {
+                "path": "/ds/json/arrays.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-objects",
+              "label": "Use JSON objects",
+              "args": {
+                "path": "/ds/json/objects.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-adv-jsonpath",
+              "label": "Advanced JSONPath",
+              "args": {
+                "path": "/ds/json/adv-jsonpath.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-more-adv-jsonpath",
+              "label": "More advanced JSONPath",
+              "args": {
+                "path": "/ds/json/more-adv-jsonpath.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-json-learn-more",
+              "label": "Learn more",
+              "args": {
+                "path": "/ds/json/learn-more.md"
+              }
+            }
+          ]
+        },
+        {
+          "type": "internal-link",
+          "id": "ds-strings",
+          "label": "Strings",
+          "summary": "A Redis string, the most basic Redis data type, holds a sequence of bytes.",
+          "args": {
+            "path": "/ds/strings.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "ds-hashes",
+          "label": "Hashes",
+          "summary": "A Redis hash is a collection of fields, where each field is a name-value pair. Both name and value are strings.",
+          "args": {
+            "path": "/ds/hashes.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "ds-lists",
+          "label": "Lists",
+          "summary": "A Redis list is a linked list of string values, often used to implement stacks and queues.",
+          "args": {
+            "path": "/ds/lists.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "ds-sets",
+          "label": "Sets",
+          "summary": "A Redis set is an unordered collection of unique strings.",
+          "args": {
+            "path": "/ds/sets.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "ds-sorted-sets",
+          "label": "Sorted sets",
+          "summary": "A Redis sorted set is a collection of unique strings, ordered by each string's associated score.",
+          "args": {
+            "path": "/ds/sorted_sets.md"
+          }
+        },
+        {
+          "type": "group",
+          "id": "ds-ts",
+          "label": "Time series",
+          "args": {
+            "initialIsOpen": false
+          },
+          "children": [
+            {
+              "type": "internal-link",
+              "id": "ds-ts-intro",
+              "label": "Introduction",
+              "summary": "Time series simplifies the use of Redis for time-series use cases like IoT, stock prices, and telemetry.",
+              "args": {
+                "path": "/ds/ts/intro.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-create-alter",
+              "label": "Create and alter time series",
+              "args": {
+                "path": "/ds/ts/create-alter.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-add-mod-del",
+              "label": "Add, modify, and delete samples",
+              "args": {
+                "path": "/ds/ts/add-mod-del.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-ret-compact",
+              "label": "Retention and compactions",
+              "args": {
+                "path": "/ds/ts/ret-compact.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-retrieve",
+              "label": "Retrieve samples",
+              "args": {
+                "path": "/ds/ts/retrieve.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-agg-single",
+              "label": "Single-key aggregations",
+              "args": {
+                "path": "/ds/ts/single-key.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-agg-cross",
+              "label": "Cross-key aggregations",
+              "args": {
+                "path": "/ds/ts/cross-key.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-ts-learn-more",
+              "label": "Learn more",
+              "args": {
+                "path": "/ds/ts/learn-more.md"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "id": "ds-prob",
+          "label": "Probabilistic",
+          "args": {
+            "initialIsOpen": false
+          },
+          "children": [
+            {
+              "type": "internal-link",
+              "id": "ds-prob-intro",
+              "label": "Introduction",
+              "summary": "Probabilistic data structures are very useful for solving streaming analytics problems at scale.",
+              "args": {
+                "path": "/ds/prob/intro.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-hyperloglog",
+              "label": "Cardinality estimation",
+              "args": {
+                "path": "/ds/prob/hyperloglog.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-count-min-sketch",
+              "label": "Frequency estimation",
+              "args": {
+                "path": "/ds/prob/count-min-sketch.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-bloom-cuckoo",
+              "label": "Probabilistic set membership",
+              "args": {
+                "path": "/ds/prob/bloom-cuckoo.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-top-k",
+              "label": "Probabilistic most frequent items",
+              "args": {
+                "path": "/ds/prob/top-k.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-t-digest",
+              "label": "Percentiles estimation",
+              "args": {
+                "path": "/ds/prob/t-digest.md"
+              }
+            },
+            {
+              "type": "internal-link",
+              "id": "ds-prob-learn-more",
+              "label": "Learn more",
+              "args": {
+                "path": "/ds/prob/learn-more.md"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "sq",
+      "label": "How to query your data",
       "args": {
         "initialIsOpen": false
       },
       "children": [
         {
           "type": "internal-link",
-          "id": "working_with_json",
-          "label": "Working with JSON",
+          "id": "sq-intro",
+          "label": "Introduction",
+          "summary": "Try real-time searching and perform complex structured queries without compromising the database performance.",
           "args": {
-            "path": "/redis_stack/working_with_json.md"
+            "path": "/sq/intro.md"
           }
         },
         {
           "type": "internal-link",
-          "id": "vector_similarity_search",
-          "label": "Vector Similarity Search",
+          "id": "sq-exact-match",
+          "label": "Exact match",
           "args": {
-            "path": "/redis_stack/vector_similarity_search.md"
+            "path": "/sq/exact-match.md"
           }
         },
         {
           "type": "internal-link",
-          "id": "redis_for_time_series",
-          "label": "Redis for time series",
+          "id": "sq-full-text",
+          "label": "Full-text search",
           "args": {
-            "path": "/redis_stack/redis_for_time_series.md"
+            "path": "/sq/full-text.md"
           }
         },
         {
           "type": "internal-link",
-          "id": "probabilistic_data_structures",
-          "label": "Probabilistic data structures",
+          "id": "sq-range",
+          "label": "Range queries",
           "args": {
-            "path": "/redis_stack/probabilistic_data_structures.md"
+            "path": "/sq/range.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "sq-geospatial",
+          "label": "Geospatial queries",
+          "args": {
+            "path": "/sq/geospatial.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "sq-combined",
+          "label": "Combined queries",
+          "args": {
+            "path": "/sq/combined.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "sq-aggregations",
+          "label": "Analytic and transformative queries",
+          "args": {
+            "path": "/sq/aggregations.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "sq-learn-more",
+          "label": "Learn more",
+          "args": {
+            "path": "/sq/learn-more.md"
+          }
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "tf",
+      "label": "Triggers and functions explained",
+      "args": {
+        "initialIsOpen": false
+      },
+      "children": [
+        {
+          "type": "internal-link",
+          "id": "tf-intro",
+          "label": "Introduction",
+          "summary": "Trigger and execute JavaScript functions in the Redis process.",
+          "args": {
+            "path": "/tf/intro.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "tf-load",
+          "label": "Load a library",
+          "args": {
+            "path": "/tf/load.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "tf-triggers",
+          "label": "Keyspace triggers",
+          "args": {
+            "path": "/tf/triggers.md"
+          }
+        },
+        {
+          "type": "internal-link",
+          "id": "tf-learn-more",
+          "label": "Learn more",
+          "args": {
+            "path": "/tf/learn-more.md"
           }
         }
       ]

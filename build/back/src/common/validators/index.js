@@ -14,3 +14,4 @@ __exportStar(require("./redis-string.validator"), exports);
 __exportStar(require("./zset-score.validator"), exports);
 __exportStar(require("./multi-number.validator"), exports);
 __exportStar(require("./bigger-than.validator"), exports);
+__exportStar(require("./github-link.validator"), exports);

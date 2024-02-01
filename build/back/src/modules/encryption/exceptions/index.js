@@ -11,6 +11,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./encryption-service-error.exception"), exports);
+__exportStar(require("./key-decryption-error.exception"), exports);
+__exportStar(require("./key-encryption-error.exception"), exports);
+__exportStar(require("./key-unavailable.exception"), exports);
 __exportStar(require("./keytar-decryption-error.exception"), exports);
 __exportStar(require("./keytar-encryption-error.exception"), exports);
 __exportStar(require("./keytar-unavailable.exception"), exports);
