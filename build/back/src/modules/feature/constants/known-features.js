@@ -21,4 +21,8 @@ exports.knownFeatures = {
         name: index_1.KnownFeatures.RedisModuleFilter,
         storage: index_1.FeatureStorage.Database,
     },
+    [index_1.KnownFeatures.RedisClient]: {
+        name: index_1.KnownFeatures.RedisClient,
+        storage: index_1.FeatureStorage.Database,
+    },
 };

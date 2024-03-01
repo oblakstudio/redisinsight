@@ -14,14 +14,15 @@ const common_1 = require("@nestjs/common");
 const redis_observer_1 = require("../models/redis.observer");
 const constants_1 = require("../constants");
 const promise_with_timeout_1 = require("../../../utils/promise-with-timeout");
-const database_connection_service_1 = require("../../database/database-connection.service");
 const error_messages_1 = require("../../../constants/error-messages");
 const config_1 = require("../../../utils/config");
 const models_1 = require("../../../common/models");
+const database_client_factory_1 = require("../../database/providers/database.client.factory");
+const redis_client_factory_1 = require("../../redis/redis.client.factory");
 const serverConfig = config_1.default.get('server');
 let RedisObserverProvider = class RedisObserverProvider {
-    constructor(databaseConnectionService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory) {
+        this.databaseClientFactory = databaseClientFactory;
         this.logger = new common_1.Logger('RedisObserverProvider');
         this.redisObservers = new Map();
     }
@@ -36,7 +37,7 @@ let RedisObserverProvider = class RedisObserverProvider {
                 redisObserver.init(this.getRedisClientFn({
                     sessionMetadata: undefined,
                     databaseId: instanceId,
-                    context: models_1.ClientContext.Common,
+                    context: models_1.ClientContext.Profiler,
                 })).catch();
             }
             else {
@@ -51,7 +52,7 @@ let RedisObserverProvider = class RedisObserverProvider {
                         redisObserver.init(this.getRedisClientFn({
                             sessionMetadata: undefined,
                             databaseId: instanceId,
-                            context: models_1.ClientContext.Common,
+                            context: models_1.ClientContext.Profiler,
                         })).catch();
                         break;
                     case constants_1.RedisObserverStatus.Initializing:
@@ -82,11 +83,11 @@ let RedisObserverProvider = class RedisObserverProvider {
         this.redisObservers.delete(instanceId);
     }
     getRedisClientFn(clientMetadata) {
-        return async () => (0, promise_with_timeout_1.withTimeout)(this.databaseConnectionService.createClient(clientMetadata), serverConfig.requestTimeout, new common_1.ServiceUnavailableException(error_messages_1.default.NO_CONNECTION_TO_REDIS_DB));
+        return async () => (0, promise_with_timeout_1.withTimeout)(this.databaseClientFactory.createClient(clientMetadata, { clientLib: redis_client_factory_1.RedisClientLib.IOREDIS }), serverConfig.requestTimeout, new common_1.ServiceUnavailableException(error_messages_1.default.NO_CONNECTION_TO_REDIS_DB));
     }
 };
 RedisObserverProvider = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService])
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory])
 ], RedisObserverProvider);
 exports.RedisObserverProvider = RedisObserverProvider;

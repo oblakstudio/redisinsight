@@ -21,7 +21,6 @@ const sentinel_master_1 = require("../../redis-sentinel/models/sentinel-master")
 const models_1 = require("../../../common/models");
 const additional_redis_module_1 = require("./additional.redis.module");
 const ssh_options_1 = require("../../ssh/models/ssh-options");
-const decorators_1 = require("../../../common/decorators");
 const cloud_database_details_1 = require("../../cloud/database/models/cloud-database-details");
 const CONNECTIONS_CONFIG = config_1.default.get('connections');
 class Database {
@@ -118,7 +117,6 @@ __decorate([
     (0, class_validator_1.Min)(1000),
     (0, class_validator_1.Max)(1000000000),
     (0, class_validator_1.IsInt)({ always: true }),
-    (0, decorators_1.Default)(CONNECTIONS_CONFIG.timeout),
     __metadata("design:type", Number)
 ], Database.prototype, "timeout", void 0);
 __decorate([

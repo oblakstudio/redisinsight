@@ -5,7 +5,7 @@ const lodash_1 = require("lodash");
 const constants_1 = require("../../../../../../constants");
 const cli_helper_1 = require("../../../../../../utils/cli-helper");
 class TextFormatterStrategy {
-    format(reply, redirectedTo) {
+    format(reply) {
         let result;
         if ((0, lodash_1.isNull)(reply)) {
             result = '(nil)';
@@ -24,10 +24,6 @@ class TextFormatterStrategy {
         }
         else {
             result = reply;
-        }
-        if (redirectedTo) {
-            const { slot, address } = redirectedTo;
-            result = `-> Redirected to slot [${slot}] located at ${address}\n${result}`;
         }
         return result;
     }

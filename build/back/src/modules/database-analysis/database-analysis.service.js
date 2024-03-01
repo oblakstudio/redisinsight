@@ -20,11 +20,11 @@ const class_transformer_1 = require("class-transformer");
 const models_1 = require("./models");
 const database_analysis_provider_1 = require("./providers/database-analysis.provider");
 const keys_scanner_1 = require("./scanner/keys-scanner");
-const database_connection_service_1 = require("../database/database-connection.service");
 const database_recommendation_service_1 = require("../database-recommendation/database-recommendation.service");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
 let DatabaseAnalysisService = class DatabaseAnalysisService {
-    constructor(databaseConnectionService, recommendationService, analyzer, databaseAnalysisProvider, scanner, databaseRecommendationService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory, recommendationService, analyzer, databaseAnalysisProvider, scanner, databaseRecommendationService) {
+        this.databaseClientFactory = databaseClientFactory;
         this.recommendationService = recommendationService;
         this.analyzer = analyzer;
         this.databaseAnalysisProvider = databaseAnalysisProvider;
@@ -33,10 +33,9 @@ let DatabaseAnalysisService = class DatabaseAnalysisService {
         this.logger = new common_1.Logger('DatabaseAnalysisService');
     }
     async create(clientMetadata, dto) {
-        var _a;
         let client;
         try {
-            client = await this.databaseConnectionService.createClient(clientMetadata);
+            client = await this.databaseClientFactory.createClient(clientMetadata);
             const scanResults = await this.scanner.scan(client, {
                 filter: dto.filter,
             });
@@ -74,7 +73,7 @@ let DatabaseAnalysisService = class DatabaseAnalysisService {
             }, Promise.resolve([]));
             const analysis = (0, class_transformer_1.plainToClass)(models_1.DatabaseAnalysis, await this.analyzer.analyze({
                 databaseId: clientMetadata.databaseId,
-                db: ((_a = client === null || client === void 0 ? void 0 : client.options) === null || _a === void 0 ? void 0 : _a.db) || 0,
+                db: await (client === null || client === void 0 ? void 0 : client.getCurrentDbIndex()),
                 ...dto,
                 progress,
                 recommendations,
@@ -104,7 +103,7 @@ let DatabaseAnalysisService = class DatabaseAnalysisService {
 };
 DatabaseAnalysisService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
         recommendation_service_1.RecommendationService,
         database_analyzer_1.DatabaseAnalyzer,
         database_analysis_provider_1.DatabaseAnalysisProvider,

@@ -16,6 +16,13 @@ const SERVER_CONFIG = config_1.default.get('server');
 const PATH_CONFIG = config_1.default.get('dir_path');
 const TUTORIALS_CONFIG = config_1.default.get('tutorials');
 const CONTENT_CONFIG = config_1.default.get('content');
+const downloadableStaticFiles = (res) => {
+    var _a, _b;
+    if (((_b = (_a = res.req) === null || _a === void 0 ? void 0 : _a.query) === null || _b === void 0 ? void 0 : _b.download) === 'true') {
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', 'attachment;');
+    }
+};
 let StaticsManagementModule = class StaticsManagementModule {
 };
 StaticsManagementModule = __decorate([
@@ -26,6 +33,7 @@ StaticsManagementModule = __decorate([
                 rootPath: (0, path_1.join)(PATH_CONFIG.tutorials),
                 serveStaticOptions: {
                     fallthrough: false,
+                    setHeaders: downloadableStaticFiles,
                 },
             }),
             serve_static_1.ServeStaticModule.forRoot({
@@ -33,6 +41,7 @@ StaticsManagementModule = __decorate([
                 rootPath: (0, path_1.join)(PATH_CONFIG.customTutorials),
                 serveStaticOptions: {
                     fallthrough: false,
+                    setHeaders: downloadableStaticFiles,
                 },
             }),
             serve_static_1.ServeStaticModule.forRoot({

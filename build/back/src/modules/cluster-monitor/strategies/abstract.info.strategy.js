@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractInfoStrategy = void 0;
-const ioredis_1 = require("ioredis");
 const utils_1 = require("../../../utils");
 const lodash_1 = require("lodash");
 const models_1 = require("../models");
 const class_transformer_1 = require("class-transformer");
+const utils_2 = require("../../redis/utils");
 class AbstractInfoStrategy {
     async getClusterDetails(client) {
         let clusterDetails = await AbstractInfoStrategy.getClusterInfo(client);
@@ -21,9 +21,12 @@ class AbstractInfoStrategy {
         return (0, class_transformer_1.plainToClass)(models_1.ClusterDetails, clusterDetails);
     }
     async getClusterNodesInfo(client, nodes) {
-        const clientNodes = client.nodes();
+        const clientNodes = await client.nodes();
         return await Promise.all(nodes.map((node) => {
-            const clientNode = clientNodes.find((n) => { var _a, _b; return ((_a = n.options) === null || _a === void 0 ? void 0 : _a.host) === node.host && ((_b = n.options) === null || _b === void 0 ? void 0 : _b.port) === node.port; });
+            const clientNode = clientNodes.find((n) => {
+                var _a, _b, _c, _d;
+                return (((_a = n.options) === null || _a === void 0 ? void 0 : _a.host) === node.host && ((_b = n.options) === null || _b === void 0 ? void 0 : _b.port) === node.port) || (((_c = n.options) === null || _c === void 0 ? void 0 : _c.natHost) === node.host && ((_d = n.options) === null || _d === void 0 ? void 0 : _d.natPort) === node.port);
+            });
             if (clientNode) {
                 return this.getClusterNodeInfo(clientNode, node);
             }
@@ -31,11 +34,11 @@ class AbstractInfoStrategy {
         }).filter((n) => n));
     }
     async getClusterNodeInfo(nodeClient, node) {
-        const info = (0, utils_1.convertRedisInfoReplyToObject)(await nodeClient.info());
+        const info = (0, utils_1.convertRedisInfoReplyToObject)(await nodeClient.sendCommand(['info'], { replyEncoding: 'utf8' }));
         return {
             ...node,
             totalKeys: (0, lodash_1.sum)((0, lodash_1.map)((0, lodash_1.get)(info, 'keyspace', {}), (dbKeys) => {
-                const { keys } = (0, utils_1.convertBulkStringsToObject)(dbKeys, ',', '=');
+                const { keys } = (0, utils_2.convertMultilineReplyToObject)(dbKeys, ',', '=');
                 return parseInt(keys, 10);
             })),
             usedMemory: (0, utils_1.convertStringToNumber)((0, lodash_1.get)(info, 'memory.used_memory')),
@@ -53,9 +56,7 @@ class AbstractInfoStrategy {
         };
     }
     static async getClusterInfo(client) {
-        const info = (0, utils_1.convertBulkStringsToObject)(await client.sendCommand(new ioredis_1.Command('cluster', ['info'], {
-            replyEncoding: 'utf8',
-        })));
+        const info = (0, utils_2.convertMultilineReplyToObject)(await client.sendCommand(['cluster', 'info'], { replyEncoding: 'utf8' }));
         const slotsState = {
             slotsAssigned: (0, utils_1.convertStringToNumber)(info.cluster_slots_assigned, 0),
             slotsOk: (0, utils_1.convertStringToNumber)(info.cluster_slots_ok, 0),

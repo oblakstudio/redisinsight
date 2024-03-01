@@ -8,54 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SshTunnelProvider = void 0;
 const common_1 = require("@nestjs/common");
-const detectPort = require("detect-port");
-const net_1 = require("net");
-const ssh2_1 = require("ssh2");
 const ssh_tunnel_1 = require("./models/ssh-tunnel");
 const exceptions_1 = require("./exceptions");
+const tunnel_ssh_1 = require("tunnel-ssh");
 let SshTunnelProvider = class SshTunnelProvider {
-    async createServer() {
-        return new Promise((resolve, reject) => {
-            try {
-                const server = (0, net_1.createServer)();
-                server.on('listening', () => resolve(server));
-                server.on('error', (e) => {
-                    reject(new exceptions_1.UnableToCreateLocalServerException(e.message));
-                });
-                detectPort({
-                    hostname: '127.0.0.1',
-                    port: 50000,
-                })
-                    .then((port) => {
-                    server.listen({
-                        host: '127.0.0.1',
-                        port,
-                    });
-                })
-                    .catch(reject);
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
-    }
-    async createClient(options) {
-        return new Promise((resolve, reject) => {
-            const conn = new ssh2_1.Client();
-            conn.on('ready', () => resolve(conn));
-            conn.on('error', (e) => {
-                reject(new exceptions_1.UnableToCreateSshConnectionException(e.message));
-            });
-            conn.connect(options);
-        });
-    }
-    async createTunnel(database) {
+    async createTunnel(target, sshOptions) {
         try {
-            const client = await this.createClient(database === null || database === void 0 ? void 0 : database.sshOptions);
-            const server = await this.createServer();
+            const [server, client] = await (0, tunnel_ssh_1.createTunnel)({
+                autoClose: false,
+            }, {
+                host: '127.0.0.1',
+            }, {
+                ...sshOptions,
+            }, {
+                dstAddr: target.host,
+                dstPort: target.port,
+            });
             return new ssh_tunnel_1.SshTunnel(server, client, {
-                targetHost: database.host,
-                targetPort: database.port,
+                targetHost: target.host,
+                targetPort: target.port,
             });
         }
         catch (e) {

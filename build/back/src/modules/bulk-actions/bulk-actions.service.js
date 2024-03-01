@@ -12,16 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkActionsService = void 0;
 const common_1 = require("@nestjs/common");
 const bulk_actions_provider_1 = require("./providers/bulk-actions.provider");
-const bulk_actions_analytics_service_1 = require("./bulk-actions-analytics.service");
+const bulk_actions_analytics_1 = require("./bulk-actions.analytics");
 let BulkActionsService = class BulkActionsService {
-    constructor(bulkActionsProvider, analyticsService) {
+    constructor(bulkActionsProvider, analytics) {
         this.bulkActionsProvider = bulkActionsProvider;
-        this.analyticsService = analyticsService;
+        this.analytics = analytics;
     }
     async create(dto, socket) {
         const bulkAction = await this.bulkActionsProvider.create(dto, socket);
         const overview = bulkAction.getOverview();
-        this.analyticsService.sendActionStarted(overview);
+        this.analytics.sendActionStarted(overview);
         return overview;
     }
     async get(dto) {
@@ -39,6 +39,6 @@ let BulkActionsService = class BulkActionsService {
 BulkActionsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [bulk_actions_provider_1.BulkActionsProvider,
-        bulk_actions_analytics_service_1.BulkActionsAnalyticsService])
+        bulk_actions_analytics_1.BulkActionsAnalytics])
 ], BulkActionsService);
 exports.BulkActionsService = BulkActionsService;

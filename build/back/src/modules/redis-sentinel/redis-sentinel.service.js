@@ -11,21 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisSentinelService = void 0;
 const common_1 = require("@nestjs/common");
-const redis_service_1 = require("../redis/redis.service");
 const models_1 = require("../../common/models");
 const database_service_1 = require("../database/database.service");
 const utils_1 = require("../../utils");
 const redis_sentinel_analytics_1 = require("./redis-sentinel.analytics");
-const database_info_provider_1 = require("../database/providers/database-info.provider");
 const database_factory_1 = require("../database/providers/database.factory");
-const redis_connection_factory_1 = require("../redis/redis-connection.factory");
+const utils_2 = require("../redis/utils");
+const redis_client_factory_1 = require("../redis/redis.client.factory");
 let RedisSentinelService = class RedisSentinelService {
-    constructor(redisService, redisConnectionFactory, databaseService, databaseFactory, databaseInfoProvider, redisSentinelAnalytics) {
-        this.redisService = redisService;
-        this.redisConnectionFactory = redisConnectionFactory;
+    constructor(redisClientFactory, databaseService, databaseFactory, redisSentinelAnalytics) {
+        this.redisClientFactory = redisClientFactory;
         this.databaseService = databaseService;
         this.databaseFactory = databaseFactory;
-        this.databaseInfoProvider = databaseInfoProvider;
         this.redisSentinelAnalytics = redisSentinelAnalytics;
         this.logger = new common_1.Logger('RedisSentinelService');
     }
@@ -76,12 +73,12 @@ let RedisSentinelService = class RedisSentinelService {
         let result;
         try {
             const database = await this.databaseFactory.createStandaloneDatabaseModel(dto);
-            const client = await this.redisConnectionFactory.createStandaloneConnection({
+            const client = await this.redisClientFactory.getConnectionStrategy().createStandaloneClient({
                 sessionMetadata: {},
                 databaseId: database.id,
                 context: models_1.ClientContext.Common,
             }, database, { useRetry: false });
-            result = await this.databaseInfoProvider.determineSentinelMasterGroups(client);
+            result = await (0, utils_2.discoverSentinelMasterGroups)(client);
             this.redisSentinelAnalytics.sendGetSentinelMastersSucceedEvent(result);
             await client.disconnect();
         }
@@ -95,11 +92,9 @@ let RedisSentinelService = class RedisSentinelService {
 };
 RedisSentinelService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [redis_service_1.RedisService,
-        redis_connection_factory_1.RedisConnectionFactory,
+    __metadata("design:paramtypes", [redis_client_factory_1.RedisClientFactory,
         database_service_1.DatabaseService,
         database_factory_1.DatabaseFactory,
-        database_info_provider_1.DatabaseInfoProvider,
         redis_sentinel_analytics_1.RedisSentinelAnalytics])
 ], RedisSentinelService);
 exports.RedisSentinelService = RedisSentinelService;

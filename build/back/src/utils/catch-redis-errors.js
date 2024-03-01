@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.catchTransactionError = exports.catchAclError = exports.catchRedisConnectionError = exports.getRedisConnectionException = exports.isCertError = void 0;
+exports.catchMultiTransactionError = exports.catchTransactionError = exports.catchAclError = exports.catchRedisConnectionError = exports.getRedisConnectionException = exports.isCertError = void 0;
 const common_1 = require("@nestjs/common");
 const constants_1 = require("../constants");
 const error_messages_1 = require("../constants/error-messages");
@@ -73,7 +73,9 @@ const catchRedisConnectionError = (error, connectionOptions, errorPlaceholder = 
 exports.catchRedisConnectionError = catchRedisConnectionError;
 const catchAclError = (error) => {
     var _a, _b;
-    if (error instanceof exceptions_1.EncryptionServiceErrorException) {
+    if (error instanceof exceptions_1.EncryptionServiceErrorException
+        || error instanceof common_1.NotFoundException
+        || error instanceof common_1.ConflictException) {
         throw error;
     }
     if ((_a = error === null || error === void 0 ? void 0 : error.message) === null || _a === void 0 ? void 0 : _a.includes(constants_1.RedisErrorCodes.NoPermission)) {
@@ -100,3 +102,10 @@ const catchTransactionError = (transactionError, transactionResults) => {
     }
 };
 exports.catchTransactionError = catchTransactionError;
+const catchMultiTransactionError = (transactionResults) => {
+    transactionResults.forEach(([err]) => {
+        if (err)
+            throw err;
+    });
+};
+exports.catchMultiTransactionError = catchMultiTransactionError;

@@ -57,7 +57,6 @@ let LocalCommandExecutionRepository = class LocalCommandExecutionRepository exte
             command: commandExecutions[idx].command,
             mode: commandExecutions[idx].mode,
             result: commandExecutions[idx].result,
-            nodeOptions: commandExecutions[idx].nodeOptions,
             summary: commandExecutions[idx].summary,
             executionTime: commandExecutions[idx].executionTime,
         })));
@@ -80,8 +79,6 @@ let LocalCommandExecutionRepository = class LocalCommandExecutionRepository exte
             'e.databaseId',
             'e.createdAt',
             'e.encryption',
-            'e.role',
-            'e.nodeOptions',
             'e.mode',
             'e.summary',
             'e.resultsMode',

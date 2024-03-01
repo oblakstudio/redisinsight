@@ -10,18 +10,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeysScanner = void 0;
-const ioredis_1 = require("ioredis");
 const common_1 = require("@nestjs/common");
-const database_total_util_1 = require("../../database/utils/database.total.util");
+const utils_1 = require("../../redis/utils");
 const key_info_provider_1 = require("./key-info/key-info.provider");
+const client_1 = require("../../redis/client");
 let KeysScanner = class KeysScanner {
     constructor(keyInfoProvider) {
         this.keyInfoProvider = keyInfoProvider;
     }
     async scan(client, opts) {
         let nodes = [];
-        if (client instanceof ioredis_1.Cluster) {
-            nodes = client.nodes('master');
+        if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
+            nodes = await client.nodes(client_1.RedisClientNodeRole.PRIMARY);
         }
         else {
             nodes = [client];
@@ -29,36 +29,32 @@ let KeysScanner = class KeysScanner {
         return Promise.all(nodes.map((node) => this.nodeScan(node, opts)));
     }
     async nodeScan(client, opts) {
-        const total = await (0, database_total_util_1.getTotal)(client);
+        const total = await (0, utils_1.getTotalKeys)(client);
         let indexes;
         let libraries;
         try {
-            indexes = await client.sendCommand(new ioredis_1.Command('FT._LIST', [], { replyEncoding: 'utf8' }));
+            indexes = await client.sendCommand(['FT._LIST'], { replyEncoding: 'utf8' });
         }
         catch (err) {
         }
         try {
-            libraries = await client.sendCommand(new ioredis_1.Command('TFUNCTION', ['LIST'], { replyEncoding: 'utf8' }));
+            libraries = await client.sendCommand(['TFUNCTION', 'LIST'], { replyEncoding: 'utf8' });
         }
         catch (err) {
         }
-        const [, keys,] = await client.sendCommand(new ioredis_1.Command('scan', [0, ...opts.filter.getScanArgsArray()]));
+        const [, keys,] = await client.sendCommand([
+            'scan', 0, ...opts.filter.getScanArgsArray(),
+        ]);
         const [sizes, types, ttls] = await Promise.all([
-            client.pipeline(keys.map((key) => ([
+            client.sendPipeline(keys.map((key) => ([
                 'memory',
                 'usage',
                 key,
                 'samples',
                 '0',
-            ]))).exec(),
-            client.pipeline(keys.map((key) => ([
-                'type',
-                key,
-            ]))).exec(),
-            client.pipeline(keys.map((key) => ([
-                'ttl',
-                key,
-            ]))).exec(),
+            ]))),
+            client.sendPipeline(keys.map((key) => (['type', key])), { replyEncoding: 'utf8' }),
+            client.sendPipeline(keys.map((key) => (['ttl', key]))),
         ]);
         const lengths = await Promise.all(keys.map(async (key, i) => {
             const strategy = this.keyInfoProvider.getStrategy(types[i][1]);

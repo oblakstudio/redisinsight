@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLibraryFunctions = exports.getShortLibraryInformation = exports.getLibraryInformation = void 0;
 const lodash_1 = require("lodash");
-const utils_1 = require("../../../utils");
 const models_1 = require("../models");
+const utils_1 = require("../../redis/utils");
 const getFunctionDetails = (functions, type, libName) => functions.map((reply) => {
     if (type === models_1.FunctionType.ClusterFunction) {
         return ({
@@ -12,7 +12,7 @@ const getFunctionDetails = (functions, type, libName) => functions.map((reply) =
             library: libName,
         });
     }
-    const func = (0, utils_1.convertStringsArrayToObject)(reply);
+    const func = (0, utils_1.convertArrayReplyToObject)(reply);
     return ({
         name: func.name,
         success: func.num_success,
@@ -45,7 +45,7 @@ const collectFunctions = (lib) => {
 };
 const getTotalFunctions = (lib) => (Object.values(models_1.FunctionType).reduce((prev, cur) => { var _a; return prev + (((_a = lib[cur]) === null || _a === void 0 ? void 0 : _a.length) || 0); }, 0));
 const getLibraryInformation = (lib) => {
-    const library = (0, utils_1.convertStringsArrayToObject)(lib);
+    const library = (0, utils_1.convertArrayReplyToObject)(lib);
     const functions = getFunctionNames(library);
     return ({
         name: library.name,
@@ -59,7 +59,7 @@ const getLibraryInformation = (lib) => {
 };
 exports.getLibraryInformation = getLibraryInformation;
 const getShortLibraryInformation = (lib) => {
-    const library = (0, utils_1.convertStringsArrayToObject)(lib);
+    const library = (0, utils_1.convertArrayReplyToObject)(lib);
     const totalFunctions = getTotalFunctions(library);
     return ({
         name: library.name,
@@ -69,5 +69,5 @@ const getShortLibraryInformation = (lib) => {
     });
 };
 exports.getShortLibraryInformation = getShortLibraryInformation;
-const getLibraryFunctions = (lib) => collectFunctions((0, utils_1.convertStringsArrayToObject)(lib));
+const getLibraryFunctions = (lib) => collectFunctions((0, utils_1.convertArrayReplyToObject)(lib));
 exports.getLibraryFunctions = getLibraryFunctions;

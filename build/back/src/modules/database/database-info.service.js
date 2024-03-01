@@ -11,15 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseInfoService = void 0;
 const common_1 = require("@nestjs/common");
-const database_connection_service_1 = require("./database-connection.service");
 const database_overview_provider_1 = require("./providers/database-overview.provider");
-const database_info_provider_1 = require("./providers/database-info.provider");
 const database_recommendation_service_1 = require("../database-recommendation/database-recommendation.service");
 const constants_1 = require("../../constants");
+const database_client_factory_1 = require("./providers/database.client.factory");
+const database_info_provider_1 = require("./providers/database-info.provider");
 const database_service_1 = require("./database.service");
 let DatabaseInfoService = class DatabaseInfoService {
-    constructor(databaseConnectionService, databaseOverviewProvider, databaseInfoProvider, recommendationService, databaseService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory, databaseOverviewProvider, databaseInfoProvider, recommendationService, databaseService) {
+        this.databaseClientFactory = databaseClientFactory;
         this.databaseOverviewProvider = databaseOverviewProvider;
         this.databaseInfoProvider = databaseInfoProvider;
         this.recommendationService = recommendationService;
@@ -28,12 +28,12 @@ let DatabaseInfoService = class DatabaseInfoService {
     }
     async getInfo(clientMetadata) {
         this.logger.log(`Getting database info for: ${clientMetadata.databaseId}`);
-        const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
+        const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
         return this.databaseInfoProvider.getRedisGeneralInfo(client);
     }
     async getOverview(clientMetadata) {
         this.logger.log(`Getting database overview for: ${clientMetadata.databaseId}`);
-        const client = await this.databaseConnectionService.getOrCreateClient({
+        const client = await this.databaseClientFactory.getOrCreateClient({
             ...clientMetadata,
             db: undefined,
         });
@@ -45,7 +45,7 @@ let DatabaseInfoService = class DatabaseInfoService {
         let client;
         const prevDb = (_c = (_a = clientMetadata.db) !== null && _a !== void 0 ? _a : (_b = (await this.databaseService.get(clientMetadata.databaseId))) === null || _b === void 0 ? void 0 : _b.db) !== null && _c !== void 0 ? _c : 0;
         try {
-            client = await this.databaseConnectionService.createClient({
+            client = await this.databaseClientFactory.createClient({
                 ...clientMetadata,
                 db,
             });
@@ -62,7 +62,7 @@ let DatabaseInfoService = class DatabaseInfoService {
 };
 DatabaseInfoService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
         database_overview_provider_1.DatabaseOverviewProvider,
         database_info_provider_1.DatabaseInfoProvider,
         database_recommendation_service_1.DatabaseRecommendationService,

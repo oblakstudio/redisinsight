@@ -5,45 +5,40 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PluginCommandsWhitelistProvider = void 0;
 const common_1 = require("@nestjs/common");
-const redis_tool_service_1 = require("../../redis/redis-tool.service");
 const lodash_1 = require("lodash");
 const constants_1 = require("../../../constants");
 let PluginCommandsWhitelistProvider = class PluginCommandsWhitelistProvider {
-    constructor(redisTool) {
-        this.redisTool = redisTool;
+    constructor() {
         this.databasesCommands = new Map();
     }
-    async getWhitelistCommands(clientMetadata) {
-        return this.databasesCommands.get(clientMetadata.databaseId)
-            || this.determineWhitelistCommandsForDatabase(clientMetadata);
+    async getWhitelistCommands(client) {
+        return this.databasesCommands.get(client.clientMetadata.databaseId)
+            || this.determineWhitelistCommandsForDatabase(client);
     }
-    async determineWhitelistCommandsForDatabase(clientMetadata) {
-        const client = await this.redisTool.getRedisClient(clientMetadata);
+    async determineWhitelistCommandsForDatabase(client) {
         const commands = await this.calculateWhiteListCommands(client);
-        this.databasesCommands.set(clientMetadata.databaseId, commands);
+        this.databasesCommands.set(client.clientMetadata.databaseId, commands);
         return commands;
     }
     async calculateWhiteListCommands(client) {
         let pluginWhiteListCommands = [];
+        const replyEncoding = 'utf8';
         try {
-            const availableCommands = await client.call('command');
+            const availableCommands = await client.call(['command'], { replyEncoding });
             const readOnlyCommands = (0, lodash_1.map)((0, lodash_1.filter)(availableCommands, (command) => (0, lodash_1.get)(command, [2], [])
                 .includes('readonly')), (command) => command[0]);
             const blackListCommands = [...constants_1.pluginUnsupportedCommands, ...constants_1.pluginBlockingCommands];
             try {
-                const dangerousCommands = await client.call('acl', ['cat', 'dangerous']);
+                const dangerousCommands = await client.call(['acl', 'cat', 'dangerous'], { replyEncoding });
                 blackListCommands.push(...dangerousCommands);
             }
             catch (e) {
             }
             try {
-                const blockingCommands = await client.call('acl', ['cat', 'blocking']);
+                const blockingCommands = await client.call(['acl', 'cat', 'blocking'], { replyEncoding });
                 blackListCommands.push(...blockingCommands);
             }
             catch (e) {
@@ -56,7 +51,6 @@ let PluginCommandsWhitelistProvider = class PluginCommandsWhitelistProvider {
     }
 };
 PluginCommandsWhitelistProvider = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [redis_tool_service_1.RedisToolService])
+    (0, common_1.Injectable)()
 ], PluginCommandsWhitelistProvider);
 exports.PluginCommandsWhitelistProvider = PluginCommandsWhitelistProvider;

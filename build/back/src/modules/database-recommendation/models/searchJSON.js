@@ -12,7 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchJSON = void 0;
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
-const dto_1 = require("../../browser/dto");
+const dto_1 = require("../../browser/keys/dto");
+const client_1 = require("../../redis/client");
 class SearchJSON {
 }
 __decorate([
@@ -20,7 +21,7 @@ __decorate([
         description: 'Redis client',
     }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Object)
+    __metadata("design:type", client_1.RedisClient)
 ], SearchJSON.prototype, "client", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({

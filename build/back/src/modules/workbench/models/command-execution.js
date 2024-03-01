@@ -14,7 +14,6 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const command_execution_result_1 = require("./command-execution-result");
 const create_command_execution_dto_1 = require("../dto/create-command-execution.dto");
-const cli_dto_1 = require("../../cli/dto/cli.dto");
 const class_transformer_1 = require("class-transformer");
 class ResultsSummary {
 }
@@ -117,23 +116,6 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Boolean)
 ], CommandExecution.prototype, "isNotStored", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Nodes roles where command was executed',
-        default: create_command_execution_dto_1.ClusterNodeRole.All,
-        enum: create_command_execution_dto_1.ClusterNodeRole,
-    }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", String)
-], CommandExecution.prototype, "role", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Node where command was executed',
-        type: cli_dto_1.ClusterSingleNodeOptions,
-    }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", cli_dto_1.ClusterSingleNodeOptions)
-], CommandExecution.prototype, "nodeOptions", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Date of command execution',

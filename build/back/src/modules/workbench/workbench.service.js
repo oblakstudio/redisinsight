@@ -17,22 +17,22 @@ const create_command_execution_dto_1 = require("./dto/create-command-execution.d
 const cli_helper_1 = require("../../utils/cli-helper");
 const error_messages_1 = require("../../constants/error-messages");
 const cli_dto_1 = require("../cli/dto/cli.dto");
-const database_connection_service_1 = require("../database/database-connection.service");
 const command_execution_repository_1 = require("./repositories/command-execution.repository");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
 const getUnsupportedCommands_1 = require("./utils/getUnsupportedCommands");
 const workbench_analytics_service_1 = require("./services/workbench-analytics/workbench-analytics.service");
 let WorkbenchService = class WorkbenchService {
-    constructor(databaseConnectionService, commandsExecutor, commandExecutionRepository, analyticsService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory, commandsExecutor, commandExecutionRepository, analyticsService) {
+        this.databaseClientFactory = databaseClientFactory;
         this.commandsExecutor = commandsExecutor;
         this.commandExecutionRepository = commandExecutionRepository;
         this.analyticsService = analyticsService;
     }
-    async createCommandExecution(clientMetadata, dto, db = 0) {
+    async createCommandExecution(client, dto) {
         const commandExecution = {
             ...(0, lodash_1.omit)(dto, 'commands'),
-            db,
-            databaseId: clientMetadata.databaseId,
+            db: await client.getCurrentDbIndex(),
+            databaseId: client.clientMetadata.databaseId,
         };
         const command = (0, cli_helper_1.multilineCommandToOneLine)(dto.command);
         const deprecatedCommand = this.findCommandInBlackList(command);
@@ -46,17 +46,17 @@ let WorkbenchService = class WorkbenchService {
         }
         else {
             const startCommandExecutionTime = process.hrtime.bigint();
-            commandExecution.result = await this.commandsExecutor.sendCommand(clientMetadata, { ...dto, command });
+            commandExecution.result = await this.commandsExecutor.sendCommand(client, { ...dto, command });
             const endCommandExecutionTime = process.hrtime.bigint();
             commandExecution.executionTime = Math.round((Number(endCommandExecutionTime - startCommandExecutionTime) / 1000));
         }
         return commandExecution;
     }
-    async createCommandsExecution(clientMetadata, dto, commands, db = 0, onlyErrorResponse = false) {
+    async createCommandsExecution(client, dto, commands, onlyErrorResponse = false) {
         const commandExecution = {
             ...dto,
-            db,
-            databaseId: clientMetadata.databaseId,
+            db: await client.getCurrentDbIndex(),
+            databaseId: client.clientMetadata.databaseId,
         };
         const startCommandExecutionTime = process.hrtime.bigint();
         const executionResults = await Promise.all(commands.map(async (singleCommand) => {
@@ -69,7 +69,7 @@ let WorkbenchService = class WorkbenchService {
                     status: cli_dto_1.CommandExecutionStatus.Fail,
                 });
             }
-            const result = await this.commandsExecutor.sendCommand(clientMetadata, { ...dto, command });
+            const result = await this.commandsExecutor.sendCommand(client, { ...dto, command });
             return ({ ...result[0], command });
         }));
         const executionTimeInNanoseconds = process.hrtime.bigint() - startCommandExecutionTime;
@@ -91,12 +91,11 @@ let WorkbenchService = class WorkbenchService {
         return commandExecution;
     }
     async createCommandExecutions(clientMetadata, dto) {
-        var _a;
-        const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
+        const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
         if (dto.resultsMode === create_command_execution_dto_1.ResultsMode.GroupMode || dto.resultsMode === create_command_execution_dto_1.ResultsMode.Silent) {
-            return this.commandExecutionRepository.createMany([await this.createCommandsExecution(clientMetadata, dto, dto.commands, (_a = client === null || client === void 0 ? void 0 : client.options) === null || _a === void 0 ? void 0 : _a.db, dto.resultsMode === create_command_execution_dto_1.ResultsMode.Silent)]);
+            return this.commandExecutionRepository.createMany([await this.createCommandsExecution(client, dto, dto.commands, dto.resultsMode === create_command_execution_dto_1.ResultsMode.Silent)]);
         }
-        const commandExecutions = await Promise.all(dto.commands.map(async (command) => { var _a; return await this.createCommandExecution(clientMetadata, { ...dto, command }, (_a = client === null || client === void 0 ? void 0 : client.options) === null || _a === void 0 ? void 0 : _a.db); }));
+        const commandExecutions = await Promise.all(dto.commands.map(async (command) => await this.createCommandExecution(client, { ...dto, command })));
         return this.commandExecutionRepository.createMany(commandExecutions);
     }
     async listCommandExecutions(databaseId) {
@@ -121,7 +120,7 @@ let WorkbenchService = class WorkbenchService {
 };
 WorkbenchService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
         workbench_commands_executor_1.WorkbenchCommandsExecutor,
         command_execution_repository_1.CommandExecutionRepository,
         workbench_analytics_service_1.WorkbenchAnalyticsService])

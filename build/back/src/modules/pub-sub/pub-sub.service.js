@@ -15,12 +15,12 @@ const user_session_provider_1 = require("./providers/user-session.provider");
 const subscription_provider_1 = require("./providers/subscription.provider");
 const pub_sub_analytics_service_1 = require("./pub-sub.analytics.service");
 const utils_1 = require("../../utils");
-const database_connection_service_1 = require("../database/database-connection.service");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
 let PubSubService = class PubSubService {
-    constructor(sessionProvider, subscriptionProvider, databaseConnectionService, analyticsService) {
+    constructor(sessionProvider, subscriptionProvider, databaseClientFactory, analyticsService) {
         this.sessionProvider = sessionProvider;
         this.subscriptionProvider = subscriptionProvider;
-        this.databaseConnectionService = databaseConnectionService;
+        this.databaseClientFactory = databaseClientFactory;
         this.analyticsService = analyticsService;
         this.logger = new common_1.Logger('PubSubService');
     }
@@ -57,7 +57,7 @@ let PubSubService = class PubSubService {
     async publish(clientMetadata, dto) {
         try {
             this.logger.log('Publishing message.');
-            const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
             const affected = await client.publish(dto.channel, dto.message);
             this.analyticsService.sendMessagePublishedEvent(clientMetadata.databaseId, affected);
             return {
@@ -85,7 +85,7 @@ PubSubService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_session_provider_1.UserSessionProvider,
         subscription_provider_1.SubscriptionProvider,
-        database_connection_service_1.DatabaseConnectionService,
+        database_client_factory_1.DatabaseClientFactory,
         pub_sub_analytics_service_1.PubSubAnalyticsService])
 ], PubSubService);
 exports.PubSubService = PubSubService;

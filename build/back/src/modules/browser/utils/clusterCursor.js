@@ -4,7 +4,7 @@ exports.parseClusterCursor = exports.isClusterCursorValid = void 0;
 const error_messages_1 = require("../../../constants/error-messages");
 const NODES_SEPARATOR = '||';
 const CURSOR_SEPARATOR = '@';
-const CLUSTER_CURSOR_REGEX = /^(([a-z0-9.-])+:[0-9]+(@-?\d+)(?:\|{2}(?!$)|$))+$/;
+const CLUSTER_CURSOR_REGEX = /^(([a-z0-9.:-])+:[0-9]+(@-?\d+)(?:\|{2}(?!$)|$))+$/;
 const isClusterCursorValid = (cursor) => CLUSTER_CURSOR_REGEX.test(cursor);
 exports.isClusterCursorValid = isClusterCursorValid;
 const parseClusterCursor = (cursor) => {
@@ -15,7 +15,7 @@ const parseClusterCursor = (cursor) => {
     const nodes = [];
     nodeStrings.forEach((item) => {
         const [address, nextCursor] = item.split(CURSOR_SEPARATOR);
-        const [host, port] = address.split(':');
+        const [, host, port] = address.match(/(.+):(\d+)$/);
         if (parseInt(nextCursor, 10) >= 0) {
             nodes.push({
                 total: 0,

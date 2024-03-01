@@ -1,5 +1,3 @@
-## Basic data retrieval commands
-
 ### The `TS.GET` command
 
 `TS.GET` is used to get the sample with the highest timestamp from a given time series. It reports both the timestamp and the value.

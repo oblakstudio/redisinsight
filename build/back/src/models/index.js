@@ -12,4 +12,3 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./redis-client"), exports);
 __exportStar(require("./redis-cluster"), exports);
-__exportStar(require("./redis-consumer.interface"), exports);

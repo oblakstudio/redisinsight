@@ -15,29 +15,30 @@ const fs = require("fs-extra");
 const common_1 = require("@nestjs/common");
 const readline = require("readline");
 const utils_1 = require("../../common/utils");
-const database_connection_service_1 = require("../database/database-connection.service");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
 const cli_helper_1 = require("../../utils/cli-helper");
 const bulk_action_summary_1 = require("./models/bulk-action-summary");
 const constants_1 = require("./constants");
-const bulk_actions_analytics_service_1 = require("./bulk-actions-analytics.service");
+const bulk_actions_analytics_1 = require("./bulk-actions.analytics");
+const client_1 = require("../redis/client");
 const config_1 = require("../../utils/config");
 const BATCH_LIMIT = 10000;
 const PATH_CONFIG = config_1.default.get('dir_path');
 const SERVER_CONFIG = config_1.default.get('server');
 let BulkImportService = class BulkImportService {
-    constructor(databaseConnectionService, analyticsService) {
-        this.databaseConnectionService = databaseConnectionService;
-        this.analyticsService = analyticsService;
+    constructor(databaseClientFactory, analytics) {
+        this.databaseClientFactory = databaseClientFactory;
+        this.analytics = analytics;
         this.logger = new common_1.Logger('BulkImportService');
     }
     async executeBatch(client, batch) {
         const result = new bulk_action_summary_1.BulkActionSummary();
         result.addProcessed(batch.length);
         try {
-            if (client === null || client === void 0 ? void 0 : client.isCluster) {
-                await Promise.all(batch.map(async ([command, args]) => {
+            if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
+                await Promise.all(batch.map(async (command) => {
                     try {
-                        await client.call(command, args);
+                        await client.call(command);
                         result.addSuccess(1);
                     }
                     catch (e) {
@@ -46,8 +47,7 @@ let BulkImportService = class BulkImportService {
                 }));
             }
             else {
-                const commands = batch.map(([cmd, args]) => ['call', cmd, ...args]);
-                (await client.pipeline(commands).exec()).forEach(([err]) => {
+                (await client.sendPipeline(batch, { unknownCommands: true })).forEach(([err]) => {
                     if (err) {
                         result.addFailed(1);
                     }
@@ -80,11 +80,11 @@ let BulkImportService = class BulkImportService {
             status: constants_1.BulkActionStatus.Completed,
             duration: 0,
         };
-        this.analyticsService.sendActionStarted(result);
+        this.analytics.sendActionStarted(result);
         let parseErrors = 0;
         let client;
         try {
-            client = await this.databaseConnectionService.createClient(clientMetadata);
+            client = await this.databaseClientFactory.createClient(clientMetadata);
             let batch = [];
             const batchResults = [];
             try {
@@ -93,13 +93,13 @@ let BulkImportService = class BulkImportService {
                 });
                 for await (const line of rl) {
                     try {
-                        const [command, ...args] = (0, cli_helper_1.splitCliCommandLine)((line.trim()));
+                        const command = (0, cli_helper_1.splitCliCommandLine)((line.trim()));
                         if (batch.length >= BATCH_LIMIT) {
                             batchResults.push(await this.executeBatch(client, batch));
                             batch = [];
                         }
-                        if (command) {
-                            batch.push([command.toLowerCase(), args]);
+                        if (command === null || command === void 0 ? void 0 : command[0]) {
+                            batch.push(command);
                         }
                     }
                     catch (e) {
@@ -110,7 +110,7 @@ let BulkImportService = class BulkImportService {
             catch (e) {
                 result.summary.errors.push(e);
                 result.status = constants_1.BulkActionStatus.Failed;
-                this.analyticsService.sendActionFailed(result, e);
+                this.analytics.sendActionFailed(result, e);
             }
             batchResults.push(await this.executeBatch(client, batch));
             batchResults.forEach((batchResult) => {
@@ -122,7 +122,7 @@ let BulkImportService = class BulkImportService {
             result.summary.processed += parseErrors;
             result.summary.failed += parseErrors;
             if (result.status === constants_1.BulkActionStatus.Completed) {
-                this.analyticsService.sendActionSucceed(result);
+                this.analytics.sendActionSucceed(result);
             }
             client.disconnect();
             return result;
@@ -130,7 +130,7 @@ let BulkImportService = class BulkImportService {
         catch (e) {
             this.logger.error('Unable to process an import file', e);
             const exception = (0, utils_1.wrapHttpError)(e);
-            this.analyticsService.sendActionFailed(result, exception);
+            this.analytics.sendActionFailed(result, exception);
             client === null || client === void 0 ? void 0 : client.disconnect();
             throw exception;
         }
@@ -157,7 +157,7 @@ let BulkImportService = class BulkImportService {
 };
 BulkImportService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
-        bulk_actions_analytics_service_1.BulkActionsAnalyticsService])
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
+        bulk_actions_analytics_1.BulkActionsAnalytics])
 ], BulkImportService);
 exports.BulkImportService = BulkImportService;

@@ -9,17 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateCommandExecutionDto = exports.ResultsMode = exports.RunQueryMode = exports.ClusterNodeRole = void 0;
+exports.CreateCommandExecutionDto = exports.ResultsMode = exports.RunQueryMode = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-const class_transformer_1 = require("class-transformer");
-const cli_dto_1 = require("../../cli/dto/cli.dto");
-var ClusterNodeRole;
-(function (ClusterNodeRole) {
-    ClusterNodeRole["All"] = "ALL";
-    ClusterNodeRole["Master"] = "MASTER";
-    ClusterNodeRole["Slave"] = "SLAVE";
-})(ClusterNodeRole = exports.ClusterNodeRole || (exports.ClusterNodeRole = {}));
 var RunQueryMode;
 (function (RunQueryMode) {
     RunQueryMode["Raw"] = "RAW";
@@ -69,27 +61,4 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], CreateCommandExecutionDto.prototype, "resultsMode", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Execute command for nodes with defined role',
-        default: ClusterNodeRole.All,
-        enum: ClusterNodeRole,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(ClusterNodeRole, {
-        message: `role must be a valid enum value. Valid values: ${Object.values(ClusterNodeRole)}.`,
-    }),
-    __metadata("design:type", String)
-], CreateCommandExecutionDto.prototype, "role", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Should be provided if only one node needs to execute the command.',
-        type: cli_dto_1.ClusterSingleNodeOptions,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmptyObject)(),
-    (0, class_transformer_1.Type)(() => cli_dto_1.ClusterSingleNodeOptions),
-    (0, class_validator_1.ValidateNested)(),
-    __metadata("design:type", cli_dto_1.ClusterSingleNodeOptions)
-], CreateCommandExecutionDto.prototype, "nodeOptions", void 0);
 exports.CreateCommandExecutionDto = CreateCommandExecutionDto;

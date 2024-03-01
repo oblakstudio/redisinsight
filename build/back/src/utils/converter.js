@@ -1,12 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertStringToNumber = exports.convertIntToSemanticVersion = exports.convertStringsArrayToObject = void 0;
+exports.convertStringToNumber = exports.convertIntToSemanticVersion = void 0;
 const lodash_1 = require("lodash");
-const convertStringsArrayToObject = (input) => (0, lodash_1.chunk)(input, 2).reduce((prev, current) => {
-    const [key, value] = current;
-    return { ...prev, [key.toLowerCase()]: value };
-}, {});
-exports.convertStringsArrayToObject = convertStringsArrayToObject;
 const convertIntToSemanticVersion = (input) => {
     const separator = '.';
     try {

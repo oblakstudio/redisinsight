@@ -16,7 +16,6 @@ class ExportDatabase extends (0, swagger_1.PickType)(database_1.Database, [
     'provider',
     'lastConnection',
     'sentinelMaster',
-    'nodes',
     'modules',
     'tls',
     'tlsServername',

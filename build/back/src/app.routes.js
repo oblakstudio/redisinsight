@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.routes = void 0;
-const browser_module_1 = require("./modules/browser/browser.module");
 const cli_module_1 = require("./modules/cli/cli.module");
 const workbench_module_1 = require("./modules/workbench/workbench.module");
 const slow_log_module_1 = require("./modules/slow-log/slow-log.module");
@@ -15,10 +14,6 @@ exports.routes = [
     {
         path: '/databases',
         children: [
-            {
-                path: '/:dbInstance',
-                module: browser_module_1.BrowserModule,
-            },
             {
                 path: '/:dbInstance',
                 module: cli_module_1.CliModule,

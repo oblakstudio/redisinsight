@@ -14,22 +14,22 @@ const common_1 = require("@nestjs/common");
 const promise_with_timeout_1 = require("../../../utils/promise-with-timeout");
 const error_messages_1 = require("../../../constants/error-messages");
 const config_1 = require("../../../utils/config");
-const redis_client_1 = require("../model/redis-client");
-const database_connection_service_1 = require("../../database/database-connection.service");
+const redis_client_subscriber_1 = require("../model/redis-client-subscriber");
+const database_client_factory_1 = require("../../database/providers/database.client.factory");
 const serverConfig = config_1.default.get('server');
 let RedisClientProvider = class RedisClientProvider {
-    constructor(databaseConnectionService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory) {
+        this.databaseClientFactory = databaseClientFactory;
     }
     createClient(clientMetadata) {
-        return new redis_client_1.RedisClient(clientMetadata.databaseId, this.getConnectFn(clientMetadata));
+        return new redis_client_subscriber_1.RedisClientSubscriber(clientMetadata.databaseId, this.getConnectFn(clientMetadata));
     }
     getConnectFn(clientMetadata) {
-        return () => (0, promise_with_timeout_1.withTimeout)(this.databaseConnectionService.createClient(clientMetadata), serverConfig.requestTimeout, new common_1.ServiceUnavailableException(error_messages_1.default.NO_CONNECTION_TO_REDIS_DB));
+        return () => (0, promise_with_timeout_1.withTimeout)(this.databaseClientFactory.createClient(clientMetadata), serverConfig.requestTimeout, new common_1.ServiceUnavailableException(error_messages_1.default.NO_CONNECTION_TO_REDIS_DB));
     }
 };
 RedisClientProvider = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService])
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory])
 ], RedisClientProvider);
 exports.RedisClientProvider = RedisClientProvider;

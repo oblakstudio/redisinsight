@@ -8,20 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecommendationProvider = void 0;
 const common_1 = require("@nestjs/common");
-const ioredis_1 = require("ioredis");
 const lodash_1 = require("lodash");
 const semverCompare = require("node-version-compare");
 const utils_1 = require("../../../utils");
 const constants_1 = require("../../../constants");
-const dto_1 = require("../../browser/dto");
+const dto_1 = require("../../browser/keys/dto");
 const constants_2 = require("../../../common/constants");
+const utils_2 = require("../../redis/utils");
+const client_1 = require("../../redis/client");
 let RecommendationProvider = class RecommendationProvider {
     constructor() {
         this.logger = new common_1.Logger('RecommendationProvider');
     }
     async determineLuaScriptRecommendation(redisClient) {
         try {
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(new ioredis_1.Command('info', ['memory'], { replyEncoding: 'utf8' })));
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(['info', 'memory'], { replyEncoding: 'utf8' }));
             const nodesNumbersOfCachedScripts = (0, lodash_1.get)(info, 'memory.number_of_cached_scripts');
             return parseInt(nodesNumbersOfCachedScripts, 10) > constants_2.LUA_SCRIPT_RECOMMENDATION_COUNT
                 ? { name: constants_1.RECOMMENDATION_NAMES.LUA_SCRIPT }
@@ -46,15 +47,15 @@ let RecommendationProvider = class RecommendationProvider {
         return total > constants_2.USE_SMALLER_KEYS_RECOMMENDATION_TOTAL ? { name: constants_1.RECOMMENDATION_NAMES.USE_SMALLER_KEYS } : null;
     }
     async determineLogicalDatabasesRecommendation(redisClient) {
-        if (redisClient.isCluster) {
+        if (redisClient.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
             return null;
         }
         try {
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(new ioredis_1.Command('info', ['keyspace'], { replyEncoding: 'utf8' })));
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(['info', 'keyspace'], { replyEncoding: 'utf8' }));
             const keyspace = (0, lodash_1.get)(info, 'keyspace', {});
             const databasesWithKeys = Object.values(keyspace).filter((db) => {
-                const { keys } = (0, utils_1.convertBulkStringsToObject)(db, ',', '=');
-                return keys > 0;
+                const { keys } = (0, utils_2.convertMultilineReplyToObject)(db, ',', '=');
+                return parseInt(keys, 10) > 0;
             });
             return databasesWithKeys.length > 1 ? { name: constants_1.RECOMMENDATION_NAMES.AVOID_LOGICAL_DATABASES } : null;
         }
@@ -78,9 +79,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineIncreaseSetMaxIntsetEntriesRecommendation(redisClient, keys) {
         try {
-            const [, setMaxIntsetEntries] = await redisClient.sendCommand(new ioredis_1.Command('config', ['get', 'set-max-intset-entries'], {
-                replyEncoding: 'utf8',
-            }));
+            const [, setMaxIntsetEntries] = await redisClient.sendCommand(['config', 'get', 'set-max-intset-entries'], { replyEncoding: 'utf8' });
             if (!setMaxIntsetEntries) {
                 return null;
             }
@@ -97,9 +96,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineHashHashtableToZiplistRecommendation(redisClient, keys) {
         try {
-            const [, hashMaxZiplistEntries] = await redisClient.sendCommand(new ioredis_1.Command('config', ['get', 'hash-max-ziplist-entries'], {
-                replyEncoding: 'utf8',
-            }));
+            const [, hashMaxZiplistEntries] = await redisClient.sendCommand(['config', 'get', 'hash-max-ziplist-entries'], { replyEncoding: 'utf8' });
             const hashMaxZiplistEntriesNumber = parseInt(hashMaxZiplistEntries, 10);
             const bigHash = keys.find((key) => key.type === dto_1.RedisDataType.Hash && key.length > hashMaxZiplistEntriesNumber);
             return bigHash
@@ -150,9 +147,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineZSetHashtableToZiplistRecommendation(redisClient, keys) {
         try {
-            const [, zSetMaxZiplistEntries] = await redisClient.sendCommand(new ioredis_1.Command('config', ['get', 'zset-max-ziplist-entries'], {
-                replyEncoding: 'utf8',
-            }));
+            const [, zSetMaxZiplistEntries] = await redisClient.sendCommand(['config', 'get', 'zset-max-ziplist-entries'], { replyEncoding: 'utf8' });
             const zSetMaxZiplistEntriesNumber = parseInt(zSetMaxZiplistEntries, 10);
             const bigHash = keys.find((key) => key.type === dto_1.RedisDataType.ZSet && key.length > zSetMaxZiplistEntriesNumber);
             return bigHash
@@ -176,7 +171,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineConnectionClientsRecommendation(redisClient) {
         try {
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(new ioredis_1.Command('info', ['clients'], { replyEncoding: 'utf8' })));
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(['info', 'clients'], { replyEncoding: 'utf8' }));
             const connectedClients = parseInt((0, lodash_1.get)(info, 'clients.connected_clients'), 10);
             return connectedClients > constants_2.BIG_AMOUNT_OF_CONNECTED_CLIENTS_RECOMMENDATION_CLIENTS
                 ? { name: constants_1.RECOMMENDATION_NAMES.BIG_AMOUNT_OF_CONNECTED_CLIENTS } : null;
@@ -201,7 +196,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineRedisVersionRecommendation(redisClient) {
         try {
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(new ioredis_1.Command('info', ['server'], { replyEncoding: 'utf8' })));
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(['info', 'server'], { replyEncoding: 'utf8' }));
             const version = (0, lodash_1.get)(info, 'server.redis_version');
             return semverCompare(version, constants_2.REDIS_VERSION_RECOMMENDATION_VERSION) >= 0
                 ? null
@@ -217,7 +212,7 @@ let RecommendationProvider = class RecommendationProvider {
             return { name: constants_1.RECOMMENDATION_NAMES.SET_PASSWORD };
         }
         try {
-            const users = await redisClient.sendCommand(new ioredis_1.Command('acl', ['list'], { replyEncoding: 'utf8' }));
+            const users = await redisClient.sendCommand(['acl', 'list'], { replyEncoding: 'utf8' });
             const nopassUser = users.some((user) => user.split(' ')[3] === 'nopass');
             return nopassUser ? { name: constants_1.RECOMMENDATION_NAMES.SET_PASSWORD } : null;
         }
@@ -243,7 +238,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async determineSearchIndexesRecommendation(redisClient, keys, client) {
         try {
-            if (client.isCluster) {
+            if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
                 const res = await this.determineSearchIndexesForCluster(keys, client);
                 return res ? { name: constants_1.RECOMMENDATION_NAMES.SEARCH_INDEXES, params: { keys: [res] } } : null;
             }
@@ -257,7 +252,7 @@ let RecommendationProvider = class RecommendationProvider {
     }
     async checkAuth(redisClient) {
         try {
-            await redisClient.sendCommand(new ioredis_1.Command('auth', ['pass']));
+            await redisClient.sendCommand(['auth', 'pass']);
         }
         catch (err) {
             if (err.message.includes('Client sent AUTH, but no password is set')) {
@@ -277,8 +272,8 @@ let RecommendationProvider = class RecommendationProvider {
                 processedKeysNumber += 1;
             }
             else {
-                const sortedSetMember = await client.sendCommand(new ioredis_1.Command('zrange', [keys[processedKeysNumber].name, 0, 0], { replyEncoding: 'utf8' }));
-                const keyType = await client.sendCommand(new ioredis_1.Command('type', [sortedSetMember[0]], { replyEncoding: 'utf8' }));
+                const sortedSetMember = await client.sendCommand(['zrange', keys[processedKeysNumber].name, 0, 0], { replyEncoding: 'utf8' });
+                const keyType = await client.sendCommand(['type', sortedSetMember[0]], { replyEncoding: 'utf8' });
                 if (keyType === dto_1.RedisDataType.JSON || keyType === dto_1.RedisDataType.Hash) {
                     keyName = keys[processedKeysNumber].name;
                 }
@@ -292,16 +287,13 @@ let RecommendationProvider = class RecommendationProvider {
         const sortedSets = keys
             .filter(({ type }) => type === dto_1.RedisDataType.ZSet)
             .slice(0, 100);
-        const res = await redisClient.pipeline(sortedSets.map(({ name }) => ([
+        const res = await redisClient.sendPipeline(sortedSets.map(({ name }) => ([
             'zrange',
             name,
             0,
             0,
-        ]))).exec();
-        const types = await redisClient.pipeline(res.map(([, member]) => ([
-            'type',
-            member,
-        ]))).exec();
+        ])));
+        const types = await redisClient.sendPipeline(res.map(([, member]) => (['type', member[0]])), { replyEncoding: 'utf8' });
         const keyIndex = types.findIndex(([, type]) => type === dto_1.RedisDataType.JSON || type === dto_1.RedisDataType.Hash);
         return keyIndex === -1 ? undefined : sortedSets[keyIndex].name;
     }
@@ -317,7 +309,7 @@ let RecommendationProvider = class RecommendationProvider {
                     processedKeysNumber += 1;
                 }
                 else {
-                    const [, membersArray] = await redisClient.sendCommand(new ioredis_1.Command('zscan', [keys[processedKeysNumber].name, '0', 'COUNT', 2], { replyEncoding: 'utf8' }));
+                    const [, membersArray] = await redisClient.sendCommand(['zscan', keys[processedKeysNumber].name, '0', 'COUNT', 2], { replyEncoding: 'utf8' });
                     if ((0, utils_1.checkTimestamp)(membersArray[0]) || (0, utils_1.checkTimestamp)(membersArray[1].toString())) {
                         timeSeriesKey = keys[processedKeysNumber].name;
                     }
@@ -337,7 +329,7 @@ let RecommendationProvider = class RecommendationProvider {
             return null;
         }
         try {
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(new ioredis_1.Command('info', ['memory'], { replyEncoding: 'utf8' })));
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await redisClient.sendCommand(['info', 'memory'], { replyEncoding: 'utf8' }));
             const nodesNumbersOfCachedScripts = (0, lodash_1.get)(info, 'memory.number_of_cached_scripts');
             return parseInt(nodesNumbersOfCachedScripts, 10) > constants_2.LUA_TO_FUNCTIONS_RECOMMENDATION_COUNT
                 ? { name: constants_1.RECOMMENDATION_NAMES.LUA_TO_FUNCTIONS }
@@ -353,7 +345,7 @@ let RecommendationProvider = class RecommendationProvider {
             return null;
         }
         try {
-            const info = await redisClient.sendCommand(new ioredis_1.Command('CONFIG', ['GET', 'notify-keyspace-events'], { replyEncoding: 'utf8' }));
+            const info = await redisClient.sendCommand(['CONFIG', 'GET', 'notify-keyspace-events'], { replyEncoding: 'utf8' });
             return (0, utils_1.checkKeyspaceNotification)(info[1])
                 ? { name: constants_1.RECOMMENDATION_NAMES.FUNCTIONS_WITH_KEYSPACE }
                 : null;

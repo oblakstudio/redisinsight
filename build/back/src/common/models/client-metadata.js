@@ -19,6 +19,7 @@ var ClientContext;
     ClientContext["Browser"] = "Browser";
     ClientContext["CLI"] = "CLI";
     ClientContext["Workbench"] = "Workbench";
+    ClientContext["Profiler"] = "Profiler";
 })(ClientContext = exports.ClientContext || (exports.ClientContext = {}));
 class ClientMetadata {
 }

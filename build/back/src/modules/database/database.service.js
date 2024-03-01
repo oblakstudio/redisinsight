@@ -18,20 +18,20 @@ const error_messages_1 = require("../../constants/error-messages");
 const database_repository_1 = require("./repositories/database.repository");
 const database_analytics_1 = require("./database.analytics");
 const utils_1 = require("../../utils");
-const redis_service_1 = require("../redis/redis.service");
 const database_info_provider_1 = require("./providers/database-info.provider");
 const database_factory_1 = require("./providers/database.factory");
 const constants_1 = require("../../constants");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const models_1 = require("../../common/models");
-const redis_connection_factory_1 = require("../redis/redis-connection.factory");
 const export_database_1 = require("./models/export-database");
 const utils_2 = require("../../common/utils");
+const redis_client_factory_1 = require("../redis/redis.client.factory");
+const redis_client_storage_1 = require("../redis/redis.client.storage");
 let DatabaseService = DatabaseService_1 = class DatabaseService {
-    constructor(repository, redisService, redisConnectionFactory, databaseInfoProvider, databaseFactory, analytics, eventEmitter) {
+    constructor(repository, redisClientStorage, redisClientFactory, databaseInfoProvider, databaseFactory, analytics, eventEmitter) {
         this.repository = repository;
-        this.redisService = redisService;
-        this.redisConnectionFactory = redisConnectionFactory;
+        this.redisClientStorage = redisClientStorage;
+        this.redisClientFactory = redisClientFactory;
         this.databaseInfoProvider = databaseInfoProvider;
         this.databaseFactory = databaseFactory;
         this.analytics = analytics;
@@ -94,7 +94,7 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
                 new: true,
             }, uniqueCheck);
             try {
-                const client = await this.redisConnectionFactory.createRedisConnection({
+                const client = await this.redisClientFactory.createClient({
                     sessionMetadata: {},
                     databaseId: database.id,
                     context: models_1.ClientContext.Common,
@@ -125,7 +125,7 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
                 if (manualUpdate) {
                     database.provider = (0, utils_1.getHostingProvider)(database.host);
                 }
-                this.redisService.removeClientInstances({ databaseId: id });
+                await this.redisClientStorage.removeManyByMetadata({ databaseId: id });
             }
             database = await this.repository.update(id, database);
             this.analytics.sendInstanceEditedEvent(oldDatabase, database, manualUpdate);
@@ -176,7 +176,7 @@ let DatabaseService = DatabaseService_1 = class DatabaseService {
         const database = await this.get(id, true);
         try {
             await this.repository.delete(id);
-            this.redisService.removeClientInstances({ databaseId: id });
+            await this.redisClientStorage.removeManyByMetadata({ databaseId: id });
             this.logger.log('Succeed to delete database instance.');
             this.analytics.sendInstanceDeletedEvent(database);
             this.eventEmitter.emit(constants_1.AppRedisInstanceEvents.Deleted, id);
@@ -235,8 +235,8 @@ DatabaseService.connectionFields = [
 DatabaseService = DatabaseService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [database_repository_1.DatabaseRepository,
-        redis_service_1.RedisService,
-        redis_connection_factory_1.RedisConnectionFactory,
+        redis_client_storage_1.RedisClientStorage,
+        redis_client_factory_1.RedisClientFactory,
         database_info_provider_1.DatabaseInfoProvider,
         database_factory_1.DatabaseFactory,
         database_analytics_1.DatabaseAnalytics,

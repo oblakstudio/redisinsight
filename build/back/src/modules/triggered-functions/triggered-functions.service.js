@@ -10,25 +10,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TriggeredFunctionsService = void 0;
-const ioredis_1 = require("ioredis");
 const common_1 = require("@nestjs/common");
 const utils_1 = require("../../utils");
 const lodash_1 = require("lodash");
 const class_transformer_1 = require("class-transformer");
-const database_connection_service_1 = require("../database/database-connection.service");
 const models_1 = require("./models");
 const utils_2 = require("./utils");
 const error_messages_1 = require("../../constants/error-messages");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
+const client_1 = require("../redis/client");
 let TriggeredFunctionsService = class TriggeredFunctionsService {
-    constructor(databaseConnectionService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory) {
+        this.databaseClientFactory = databaseClientFactory;
         this.logger = new common_1.Logger('TriggeredFunctionsService');
     }
     async libraryList(clientMetadata) {
-        let client;
         try {
-            client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const reply = await client.sendCommand(new ioredis_1.Command('TFUNCTION', ['LIST'], { replyEncoding: 'utf8' }));
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const reply = await client.sendCommand(['TFUNCTION', 'LIST'], { replyEncoding: 'utf8' });
             const libraries = reply.map((lib) => (0, utils_2.getShortLibraryInformation)(lib));
             return libraries.map((lib) => (0, class_transformer_1.plainToClass)(models_1.ShortLibrary, lib));
         }
@@ -41,10 +40,9 @@ let TriggeredFunctionsService = class TriggeredFunctionsService {
         }
     }
     async details(clientMetadata, name) {
-        let client;
         try {
-            client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const reply = await client.sendCommand(new ioredis_1.Command('TFUNCTION', ['LIST', 'WITHCODE', 'LIBRARY', name], { replyEncoding: 'utf8' }));
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const reply = await client.sendCommand(['TFUNCTION', 'LIST', 'WITHCODE', 'LIBRARY', name], { replyEncoding: 'utf8' });
             if (!reply.length) {
                 this.logger.error(`Failed to get library details. Not Found library: ${name}.`);
                 return Promise.reject(new common_1.NotFoundException(error_messages_1.default.LIBRARY_NOT_EXIST));
@@ -61,10 +59,9 @@ let TriggeredFunctionsService = class TriggeredFunctionsService {
         }
     }
     async functionsList(clientMetadata) {
-        let client;
         try {
-            client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const reply = await client.sendCommand(new ioredis_1.Command('TFUNCTION', ['LIST', 'vvv'], { replyEncoding: 'utf8' }));
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const reply = await client.sendCommand(['TFUNCTION', 'LIST', 'vvv'], { replyEncoding: 'utf8' });
             const functions = reply.reduce((prev, cur) => (0, lodash_1.concat)(prev, (0, utils_2.getLibraryFunctions)(cur)), []);
             return functions.map((func) => (0, class_transformer_1.plainToClass)(models_1.Function, func));
         }
@@ -77,19 +74,18 @@ let TriggeredFunctionsService = class TriggeredFunctionsService {
         }
     }
     async upload(clientMetadata, dto, isExist = false) {
-        let client;
         try {
-            const { code, configuration, } = dto;
+            const { code, configuration } = dto;
             const commandArgs = isExist ? ['LOAD', 'REPLACE'] : ['LOAD'];
             if (configuration) {
                 commandArgs.push('CONFIG', configuration);
             }
             commandArgs.push(code);
-            client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            if (client.isCluster) {
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
                 await this.refreshCluster(client);
             }
-            await client.sendCommand(new ioredis_1.Command('TFUNCTION', [...commandArgs], { replyEncoding: 'utf8' }));
+            await client.sendCommand(['TFUNCTION', ...commandArgs], { replyEncoding: 'utf8' });
             this.logger.log('Succeed to upload library.');
             return undefined;
         }
@@ -102,13 +98,12 @@ let TriggeredFunctionsService = class TriggeredFunctionsService {
         }
     }
     async delete(clientMetadata, libraryName) {
-        let client;
         try {
-            client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            if (client.isCluster) {
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
                 await this.refreshCluster(client);
             }
-            await client.sendCommand(new ioredis_1.Command('TFUNCTION', ['DELETE', libraryName], { replyEncoding: 'utf8' }));
+            await client.sendCommand(['TFUNCTION', 'DELETE', libraryName], { replyEncoding: 'utf8' });
             this.logger.log('Succeed to delete library.');
             return undefined;
         }
@@ -121,14 +116,14 @@ let TriggeredFunctionsService = class TriggeredFunctionsService {
         }
     }
     async refreshCluster(client) {
-        const nodes = client.nodes('master');
+        const nodes = await client.nodes(client_1.RedisClientNodeRole.PRIMARY);
         await Promise.all(nodes.map(async (node) => {
-            await node.sendCommand(new ioredis_1.Command('REDISGEARS_2.REFRESHCLUSTER'));
+            await node.sendCommand(['REDISGEARS_2.REFRESHCLUSTER']);
         }));
     }
 };
 TriggeredFunctionsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService])
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory])
 ], TriggeredFunctionsService);
 exports.TriggeredFunctionsService = TriggeredFunctionsService;

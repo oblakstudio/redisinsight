@@ -21,17 +21,20 @@ const cli_dto_1 = require("../cli/dto/cli.dto");
 const command_execution_result_1 = require("./models/command-execution-result");
 const config_1 = require("../../utils/config");
 const plugin_state_repository_1 = require("./repositories/plugin-state.repository");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
 const PLUGINS_CONFIG = config_1.default.get('plugins');
 let PluginsService = class PluginsService {
-    constructor(commandsExecutor, pluginStateRepository, whitelistProvider) {
+    constructor(commandsExecutor, pluginStateRepository, whitelistProvider, databaseClientFactory) {
         this.commandsExecutor = commandsExecutor;
         this.pluginStateRepository = pluginStateRepository;
         this.whitelistProvider = whitelistProvider;
+        this.databaseClientFactory = databaseClientFactory;
     }
     async sendCommand(clientMetadata, dto) {
         try {
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
             await this.checkWhitelistedCommands(clientMetadata, dto.command);
-            const result = await this.commandsExecutor.sendCommand(clientMetadata, dto);
+            const result = await this.commandsExecutor.sendCommand(client, dto);
             return (0, class_transformer_1.plainToClass)(plugin_command_execution_1.PluginCommandExecution, {
                 ...dto,
                 databaseId: clientMetadata.databaseId,
@@ -53,7 +56,8 @@ let PluginsService = class PluginsService {
         }
     }
     async getWhitelistCommands(clientMetadata) {
-        return await this.whitelistProvider.getWhitelistCommands(clientMetadata);
+        const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+        return await this.whitelistProvider.getWhitelistCommands(client);
     }
     async saveState(visualizationId, commandExecutionId, dto) {
         if (JSON.stringify(dto.state).length > PLUGINS_CONFIG.stateMaxSize) {
@@ -80,6 +84,7 @@ PluginsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [workbench_commands_executor_1.WorkbenchCommandsExecutor,
         plugin_state_repository_1.PluginStateRepository,
-        plugin_commands_whitelist_provider_1.PluginCommandsWhitelistProvider])
+        plugin_commands_whitelist_provider_1.PluginCommandsWhitelistProvider,
+        database_client_factory_1.DatabaseClientFactory])
 ], PluginsService);
 exports.PluginsService = PluginsService;

@@ -17,7 +17,6 @@ __exportStar(require("./catch-redis-errors"), exports);
 __exportStar(require("./redis-reply-converter"), exports);
 __exportStar(require("./hosting-provider-helper"), exports);
 __exportStar(require("./analytics-helper"), exports);
-__exportStar(require("./redis-connection-helper"), exports);
 __exportStar(require("./class-transformer"), exports);
 __exportStar(require("./file-helper"), exports);
 __exportStar(require("./recommendation-helper"), exports);

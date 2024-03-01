@@ -12,21 +12,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SlowLogService = void 0;
 const lodash_1 = require("lodash");
 const common_1 = require("@nestjs/common");
-const database_connection_service_1 = require("../database/database-connection.service");
 const commands_1 = require("./constants/commands");
 const utils_1 = require("../../utils");
 const slow_log_analytics_service_1 = require("./slow-log-analytics.service");
+const utils_2 = require("../redis/utils");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
+const client_1 = require("../redis/client");
 let SlowLogService = class SlowLogService {
-    constructor(databaseConnectionService, analyticsService) {
-        this.databaseConnectionService = databaseConnectionService;
+    constructor(databaseClientFactory, analyticsService) {
+        this.databaseClientFactory = databaseClientFactory;
         this.analyticsService = analyticsService;
         this.logger = new common_1.Logger('SlowLogService');
     }
     async getSlowLogs(clientMetadata, dto) {
         try {
             this.logger.log('Getting slow logs');
-            const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const nodes = await this.getNodes(client);
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const nodes = await client.nodes();
             return (0, lodash_1.concat)(...(await Promise.all(nodes.map((node) => this.getNodeSlowLogs(node, dto)))));
         }
         catch (e) {
@@ -37,7 +39,7 @@ let SlowLogService = class SlowLogService {
         }
     }
     async getNodeSlowLogs(node, dto) {
-        const resp = await node.call(commands_1.SlowLogCommands.SlowLog, [commands_1.SlowLogArguments.Get, dto.count]);
+        const resp = await node.call([commands_1.SlowLogCommands.SlowLog, commands_1.SlowLogArguments.Get, dto.count], { replyEncoding: 'utf8' });
         return resp.map((log) => {
             const [id, time, durationUs, args, source, client] = log;
             return {
@@ -53,9 +55,9 @@ let SlowLogService = class SlowLogService {
     async reset(clientMetadata) {
         try {
             this.logger.log('Resetting slow logs');
-            const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const nodes = await this.getNodes(client);
-            await Promise.all(nodes.map((node) => node.call(commands_1.SlowLogCommands.SlowLog, commands_1.SlowLogArguments.Reset)));
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const nodes = await client.nodes();
+            await Promise.all(nodes.map((node) => node.call([commands_1.SlowLogCommands.SlowLog, commands_1.SlowLogArguments.Reset])));
         }
         catch (e) {
             if (e instanceof common_1.HttpException) {
@@ -66,8 +68,8 @@ let SlowLogService = class SlowLogService {
     }
     async getConfig(clientMetadata) {
         try {
-            const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-            const resp = (0, utils_1.convertStringsArrayToObject)(await client.call(commands_1.SlowLogCommands.Config, [commands_1.SlowLogArguments.Get, 'slowlog*']));
+            const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+            const resp = (0, utils_2.convertArrayReplyToObject)(await client.call([commands_1.SlowLogCommands.Config, commands_1.SlowLogArguments.Get, 'slowlog*'], { replyEncoding: 'utf8' }));
             return {
                 slowlogMaxLen: parseInt(resp['slowlog-max-len'], 10) || 0,
                 slowlogLogSlowerThan: parseInt(resp['slowlog-log-slower-than'], 10) || 0,
@@ -102,11 +104,13 @@ let SlowLogService = class SlowLogService {
                 config.slowlogMaxLen = dto.slowlogMaxLen;
             }
             if (commands.length) {
-                const client = await this.databaseConnectionService.getOrCreateClient(clientMetadata);
-                if (client.isCluster) {
+                const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
+                if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
                     return Promise.reject(new common_1.BadRequestException('Configuration slowlog for cluster is deprecated'));
                 }
-                await Promise.all(commands.map((command) => client.call(command.command, command.args).then(command.analytics)));
+                await Promise.all(commands.map((command) => client.call([
+                    command.command, ...command.args,
+                ]).then(command.analytics)));
             }
             return config;
         }
@@ -117,16 +121,10 @@ let SlowLogService = class SlowLogService {
             throw (0, utils_1.catchAclError)(e);
         }
     }
-    async getNodes(client) {
-        if (client.isCluster) {
-            return client.nodes();
-        }
-        return [client];
-    }
 };
 SlowLogService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
         slow_log_analytics_service_1.SlowLogAnalyticsService])
 ], SlowLogService);
 exports.SlowLogService = SlowLogService;

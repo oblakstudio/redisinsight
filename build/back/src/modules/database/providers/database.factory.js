@@ -15,16 +15,15 @@ const database_entity_1 = require("../entities/database.entity");
 const utils_1 = require("../../../utils");
 const models_1 = require("../../../common/models");
 const error_messages_1 = require("../../../constants/error-messages");
-const redis_service_1 = require("../../redis/redis.service");
 const database_info_provider_1 = require("./database-info.provider");
 const constants_1 = require("../../../constants");
 const ca_certificate_service_1 = require("../../certificate/ca-certificate.service");
 const client_certificate_service_1 = require("../../certificate/client-certificate.service");
-const redis_connection_factory_1 = require("../../redis/redis-connection.factory");
+const redis_client_factory_1 = require("../../redis/redis.client.factory");
+const utils_2 = require("../../redis/utils");
 let DatabaseFactory = class DatabaseFactory {
-    constructor(redisService, redisConnectionFactory, databaseInfoProvider, caCertificateService, clientCertificateService) {
-        this.redisService = redisService;
-        this.redisConnectionFactory = redisConnectionFactory;
+    constructor(redisClientFactory, databaseInfoProvider, caCertificateService, clientCertificateService) {
+        this.redisClientFactory = redisClientFactory;
         this.databaseInfoProvider = databaseInfoProvider;
         this.caCertificateService = caCertificateService;
         this.clientCertificateService = clientCertificateService;
@@ -32,18 +31,18 @@ let DatabaseFactory = class DatabaseFactory {
     }
     async createDatabaseModel(database) {
         let model = await this.createStandaloneDatabaseModel(database);
-        const client = await this.redisConnectionFactory.createStandaloneConnection({
+        const client = await this.redisClientFactory.getConnectionStrategy().createStandaloneClient({
             sessionMetadata: {},
             databaseId: database.id,
             context: models_1.ClientContext.Common,
         }, database, { useRetry: true });
-        if (await this.databaseInfoProvider.isSentinel(client)) {
+        if (await (0, utils_2.isSentinel)(client)) {
             if (!database.sentinelMaster) {
                 throw new Error(constants_1.RedisErrorCodes.SentinelParamsRequired);
             }
             model = await this.createSentinelDatabaseModel(database, client);
         }
-        else if (await this.databaseInfoProvider.isCluster(client)) {
+        else if (await (0, utils_2.isCluster)(client)) {
             model = await this.createClusterDatabaseModel(database, client);
         }
         model.modules = await this.databaseInfoProvider.determineDatabaseModules(client);
@@ -70,15 +69,12 @@ let DatabaseFactory = class DatabaseFactory {
     async createClusterDatabaseModel(database, client) {
         try {
             const model = database;
-            model.nodes = await this.databaseInfoProvider.determineClusterNodes(client);
-            const clusterClient = await this.redisConnectionFactory.createClusterConnection({
+            model.nodes = await (0, utils_2.discoverClusterNodes)(client);
+            const clusterClient = await this.redisClientFactory.getConnectionStrategy().createClusterClient({
                 sessionMetadata: {},
                 databaseId: model.id,
                 context: models_1.ClientContext.Common,
             }, model, { useRetry: true });
-            const primaryNodeOptions = clusterClient.nodes('master')[0].options;
-            model.host = primaryNodeOptions.host;
-            model.port = primaryNodeOptions.port;
             model.connectionType = database_entity_1.ConnectionType.CLUSTER;
             await clusterClient.disconnect();
             return model;
@@ -91,12 +87,12 @@ let DatabaseFactory = class DatabaseFactory {
     async createSentinelDatabaseModel(database, client) {
         try {
             const model = database;
-            const masters = await this.databaseInfoProvider.determineSentinelMasterGroups(client);
-            const selectedMaster = masters.find((master) => master.name === model.sentinelMaster.name);
+            const masterGroups = await (0, utils_2.discoverSentinelMasterGroups)(client);
+            const selectedMaster = masterGroups.find((master) => master.name === model.sentinelMaster.name);
             if (!selectedMaster) {
                 return Promise.reject(new common_1.NotFoundException(error_messages_1.default.MASTER_GROUP_NOT_EXIST));
             }
-            const sentinelClient = await this.redisConnectionFactory.createSentinelConnection({
+            const sentinelClient = await this.redisClientFactory.getConnectionStrategy().createSentinelClient({
                 sessionMetadata: {},
                 databaseId: model.id,
                 context: models_1.ClientContext.Common,
@@ -114,8 +110,7 @@ let DatabaseFactory = class DatabaseFactory {
 };
 DatabaseFactory = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [redis_service_1.RedisService,
-        redis_connection_factory_1.RedisConnectionFactory,
+    __metadata("design:paramtypes", [redis_client_factory_1.RedisClientFactory,
         database_info_provider_1.DatabaseInfoProvider,
         ca_certificate_service_1.CaCertificateService,
         client_certificate_service_1.ClientCertificateService])

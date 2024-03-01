@@ -16,12 +16,13 @@ const database_repository_1 = require("./repositories/database.repository");
 const local_database_repository_1 = require("./repositories/local.database.repository");
 const database_analytics_1 = require("./database.analytics");
 const database_connection_service_1 = require("./database-connection.service");
-const database_info_provider_1 = require("./providers/database-info.provider");
 const database_factory_1 = require("./providers/database.factory");
 const database_info_controller_1 = require("./database-info.controller");
 const database_info_service_1 = require("./database-info.service");
 const database_overview_provider_1 = require("./providers/database-overview.provider");
 const stack_databases_repository_1 = require("./repositories/stack.databases.repository");
+const database_client_factory_1 = require("./providers/database.client.factory");
+const database_info_provider_1 = require("./providers/database-info.provider");
 const connection_middleware_1 = require("./middleware/connection.middleware");
 const SERVER_CONFIG = config_1.default.get('server');
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
@@ -35,6 +36,7 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
             providers: [
                 database_service_1.DatabaseService,
                 database_connection_service_1.DatabaseConnectionService,
+                database_client_factory_1.DatabaseClientFactory,
                 database_info_provider_1.DatabaseInfoProvider,
                 database_analytics_1.DatabaseAnalytics,
                 database_factory_1.DatabaseFactory,
@@ -49,6 +51,7 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                 database_repository_1.DatabaseRepository,
                 database_service_1.DatabaseService,
                 database_connection_service_1.DatabaseConnectionService,
+                database_client_factory_1.DatabaseClientFactory,
                 database_factory_1.DatabaseFactory,
                 database_info_service_1.DatabaseInfoService,
                 database_info_provider_1.DatabaseInfoProvider,

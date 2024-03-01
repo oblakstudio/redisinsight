@@ -1,18 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClusterShardsInfoStrategy = void 0;
-const ioredis_1 = require("ioredis");
 const lodash_1 = require("lodash");
 const abstract_info_strategy_1 = require("./abstract.info.strategy");
-const utils_1 = require("../../../utils");
 const models_1 = require("../models");
+const utils_1 = require("../../redis/utils");
 class ClusterShardsInfoStrategy extends abstract_info_strategy_1.AbstractInfoStrategy {
     async getClusterNodesFromRedis(client) {
-        const resp = await client.sendCommand(new ioredis_1.Command('cluster', ['shards'], {
-            replyEncoding: 'utf8',
-        }));
+        const resp = await client.sendCommand(['cluster', 'shards'], { replyEncoding: 'utf8' });
         return [].concat(...resp.map((shardArray) => {
-            const shard = (0, utils_1.convertStringsArrayToObject)(shardArray);
+            const shard = (0, utils_1.convertArrayReplyToObject)(shardArray);
             const slots = ClusterShardsInfoStrategy.calculateSlots(shard.slots);
             return ClusterShardsInfoStrategy.processShardNodes(shard.nodes, slots);
         }));
@@ -28,7 +25,7 @@ class ClusterShardsInfoStrategy extends abstract_info_strategy_1.AbstractInfoStr
     static processShardNodes(shardNodes, slots) {
         let primary;
         const nodes = shardNodes.map((nodeArray) => {
-            const nodeObj = (0, utils_1.convertStringsArrayToObject)(nodeArray);
+            const nodeObj = (0, utils_1.convertArrayReplyToObject)(nodeArray);
             const node = {
                 id: nodeObj.id,
                 host: nodeObj.ip,

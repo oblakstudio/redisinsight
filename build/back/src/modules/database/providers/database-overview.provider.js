@@ -11,7 +11,8 @@ exports.DatabaseOverviewProvider = void 0;
 const common_1 = require("@nestjs/common");
 const lodash_1 = require("lodash");
 const utils_1 = require("../../../utils");
-const database_total_util_1 = require("../utils/database.total.util");
+const utils_2 = require("../../redis/utils");
+const client_1 = require("../../redis/client");
 let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOverviewProvider {
     constructor() {
         this.previousCpuStats = new Map();
@@ -22,8 +23,8 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
         let totalKeysPerDb;
         const currentDbIndex = (0, lodash_1.isNumber)(clientMetadata.db)
             ? clientMetadata.db
-            : (0, lodash_1.get)(client, ['options', 'db'], 0);
-        if (client.isCluster) {
+            : await client.getCurrentDbIndex();
+        if (client.getConnectionType() === client_1.RedisClientConnectionType.CLUSTER) {
             nodesInfo = await this.getNodesInfo(client);
             totalKeys = await this.calculateNodesTotalKeys(client);
         }
@@ -48,13 +49,13 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
     async getNodeInfo(client) {
         const { host, port } = client.options;
         return {
-            ...(0, utils_1.convertRedisInfoReplyToObject)(await client.info()),
+            ...(0, utils_1.convertRedisInfoReplyToObject)(await client.sendCommand(['info'], { replyEncoding: 'utf8' })),
             host,
             port,
         };
     }
     async getNodesInfo(client) {
-        return Promise.all(client.nodes('all').map(this.getNodeInfo));
+        return Promise.all((await client.nodes()).map(this.getNodeInfo));
     }
     getMedianValue(values) {
         if (!values.length) {
@@ -74,25 +75,25 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
         if (!this.isMetricsAvailable(nodes, 'stats.instantaneous_ops_per_sec', [undefined])) {
             return undefined;
         }
-        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_ops_per_sec', 0), 10));
+        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_ops_per_sec', '0'), 10));
     }
     calculateNetworkIn(nodes = []) {
         if (!this.isMetricsAvailable(nodes, 'stats.instantaneous_input_kbps', [undefined])) {
             return undefined;
         }
-        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_input_kbps', 0), 10));
+        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_input_kbps', '0'), 10));
     }
     calculateNetworkOut(nodes = []) {
         if (!this.isMetricsAvailable(nodes, 'stats.instantaneous_output_kbps', [undefined])) {
             return undefined;
         }
-        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_output_kbps', 0), 10));
+        return (0, lodash_1.sumBy)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'stats.instantaneous_output_kbps', '0'), 10));
     }
     calculateConnectedClients(nodes = []) {
         if (!this.isMetricsAvailable(nodes, 'clients.connected_clients', [undefined])) {
             return undefined;
         }
-        const clientsPerNode = (0, lodash_1.map)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'clients.connected_clients', 0), 10));
+        const clientsPerNode = (0, lodash_1.map)(nodes, (node) => parseInt((0, lodash_1.get)(node, 'clients.connected_clients', '0'), 10));
         return this.getMedianValue(clientsPerNode);
     }
     calculateUsedMemory(nodes = []) {
@@ -101,7 +102,7 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
             if (!this.isMetricsAvailable(masterNodes, 'memory.used_memory', [undefined])) {
                 return undefined;
             }
-            return (0, lodash_1.sumBy)(masterNodes, (node) => parseInt((0, lodash_1.get)(node, 'memory.used_memory', 0), 10));
+            return (0, lodash_1.sumBy)(masterNodes, (node) => parseInt((0, lodash_1.get)(node, 'memory.used_memory', '0'), 10));
         }
         catch (e) {
             return null;
@@ -116,7 +117,7 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
             const totalKeysPerDb = {};
             masterNodes.forEach((node) => {
                 (0, lodash_1.map)((0, lodash_1.get)(node, 'keyspace', {}), (dbKeys, dbNumber) => {
-                    const { keys } = (0, utils_1.convertBulkStringsToObject)(dbKeys, ',', '=');
+                    const { keys } = (0, utils_2.convertMultilineReplyToObject)(dbKeys, ',', '=');
                     if (!totalKeysPerDb[dbNumber]) {
                         totalKeysPerDb[dbNumber] = 0;
                     }
@@ -132,9 +133,9 @@ let DatabaseOverviewProvider = DatabaseOverviewProvider_1 = class DatabaseOvervi
         }
     }
     async calculateNodesTotalKeys(client) {
-        const nodesTotal = await Promise.all(client
-            .nodes('master')
-            .map(async (node) => (0, database_total_util_1.getTotal)(node)));
+        const nodesTotal = await Promise.all((await client
+            .nodes(client_1.RedisClientNodeRole.PRIMARY))
+            .map(async (node) => (0, utils_2.getTotalKeys)(node)));
         return nodesTotal.reduce((prev, cur) => (prev + cur), 0);
     }
     calculateCpuUsage(id, nodes = []) {

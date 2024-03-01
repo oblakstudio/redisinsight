@@ -28,6 +28,7 @@ let FeatureFlagProvider = class FeatureFlagProvider {
         this.strategies.set(constants_1.KnownFeatures.CloudSso, new cloud_sso_flag_strategy_1.CloudSsoFlagStrategy(this.featuresConfigService, this.settingsService));
         this.strategies.set(constants_1.KnownFeatures.CloudSsoRecommendedSettings, new common_flag_strategy_1.CommonFlagStrategy(this.featuresConfigService, this.settingsService));
         this.strategies.set(constants_1.KnownFeatures.RedisModuleFilter, new with_data_flag_strategy_1.WithDataFlagStrategy(this.featuresConfigService, this.settingsService));
+        this.strategies.set(constants_1.KnownFeatures.RedisClient, new with_data_flag_strategy_1.WithDataFlagStrategy(this.featuresConfigService, this.settingsService));
     }
     getStrategy(name) {
         return this.strategies.get(name) || this.getStrategy('default');

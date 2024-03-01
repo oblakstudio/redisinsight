@@ -19,9 +19,6 @@ const plugin_state_repository_1 = require("./repositories/plugin-state.repositor
 const commands_module_1 = require("../commands/commands.module");
 const commands_service_1 = require("../commands/commands.service");
 const commands_json_provider_1 = require("../commands/commands-json.provider");
-const redis_tool_service_1 = require("../redis/redis-tool.service");
-const redis_tool_factory_1 = require("../redis/redis-tool.factory");
-const models_1 = require("../../common/models");
 const plugins_service_1 = require("./plugins.service");
 const plugin_commands_whitelist_provider_1 = require("./providers/plugin-commands-whitelist.provider");
 const plugins_controller_1 = require("./plugins.controller");
@@ -51,11 +48,6 @@ let WorkbenchModule = WorkbenchModule_1 = class WorkbenchModule {
                 {
                     provide: plugin_state_repository_1.PluginStateRepository,
                     useClass: pluginStateRepository,
-                },
-                {
-                    provide: redis_tool_service_1.RedisToolService,
-                    useFactory: (redisToolFactory) => redisToolFactory.createRedisTool(models_1.ClientContext.Workbench),
-                    inject: [redis_tool_factory_1.RedisToolFactory],
                 },
                 {
                     provide: commands_service_1.CommandsService,

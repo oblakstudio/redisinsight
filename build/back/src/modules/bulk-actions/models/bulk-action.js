@@ -1,37 +1,30 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkAction = void 0;
-const IORedis = require("ioredis");
 const lodash_1 = require("lodash");
 const constants_1 = require("../constants");
 const common_1 = require("@nestjs/common");
+const client_1 = require("../../redis/client");
 class BulkAction {
-    constructor(id, databaseId, type, filter, socket, analyticsService) {
-        this.logger = new common_1.Logger('BulkAction');
-        this.startTime = Date.now();
-        this.runners = [];
+    constructor(id, databaseId, type, filter, socket, analytics) {
         this.id = id;
         this.databaseId = databaseId;
         this.type = type;
         this.filter = filter;
         this.socket = socket;
+        this.analytics = analytics;
+        this.logger = new common_1.Logger('BulkAction');
+        this.startTime = Date.now();
+        this.runners = [];
         this.debounce = (0, lodash_1.debounce)(this.sendOverview.bind(this), 1000, { maxWait: 1000 });
         this.status = constants_1.BulkActionStatus.Initialized;
-        this.analyticsService = analyticsService;
     }
     async prepare(redisClient, RunnerClassName) {
         if (this.status !== constants_1.BulkActionStatus.Initialized) {
             throw new Error(`Unable to prepare bulk action with "${this.status}" status`);
         }
         this.status = constants_1.BulkActionStatus.Preparing;
-        if (redisClient instanceof IORedis.Cluster) {
-            this.runners = redisClient.nodes('master').map((node) => new RunnerClassName(this, node));
-        }
-        else {
-            this.runners = [
-                new RunnerClassName(this, redisClient),
-            ];
-        }
+        this.runners = (await redisClient.nodes(client_1.RedisClientNodeRole.PRIMARY)).map((node) => new RunnerClassName(this, node));
         await Promise.all(this.runners.map((runner) => runner.prepareToStart()));
         this.status = constants_1.BulkActionStatus.Ready;
     }
@@ -55,7 +48,6 @@ class BulkAction {
         }
     }
     getOverview() {
-        var _a;
         const progress = this.runners.map((runner) => runner.getProgress().getOverview())
             .reduce((cur, prev) => ({
             total: prev.total + cur.total,
@@ -76,8 +68,7 @@ class BulkAction {
             failed: 0,
             errors: [],
         });
-        (_a = summary.errors) === null || _a === void 0 ? void 0 : _a.slice(0, 500);
-        summary.errors = summary.errors.map((error) => ({
+        summary.errors = summary.errors.slice(0, 500).map((error) => ({
             key: error.key.toString(),
             error: error.error.toString(),
         }));
@@ -130,13 +121,13 @@ class BulkAction {
     sendOverview() {
         const overview = this.getOverview();
         if (overview.status === constants_1.BulkActionStatus.Completed) {
-            this.analyticsService.sendActionSucceed(overview);
+            this.analytics.sendActionSucceed(overview);
         }
         if (overview.status === constants_1.BulkActionStatus.Failed) {
-            this.analyticsService.sendActionFailed(overview, this.error);
+            this.analytics.sendActionFailed(overview, this.error);
         }
         if (overview.status === constants_1.BulkActionStatus.Aborted) {
-            this.analyticsService.sendActionStopped(overview);
+            this.analytics.sendActionStopped(overview);
         }
         try {
             this.socket.emit('overview', overview);

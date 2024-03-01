@@ -15,13 +15,13 @@ const common_1 = require("@nestjs/common");
 const bulk_action_1 = require("../models/bulk-action");
 const constants_1 = require("../constants");
 const delete_bulk_action_simple_runner_1 = require("../models/runners/simple/delete.bulk-action.simple.runner");
-const database_connection_service_1 = require("../../database/database-connection.service");
-const bulk_actions_analytics_service_1 = require("../bulk-actions-analytics.service");
+const bulk_actions_analytics_1 = require("../bulk-actions.analytics");
 const models_1 = require("../../../common/models");
+const database_client_factory_1 = require("../../database/providers/database.client.factory");
 let BulkActionsProvider = BulkActionsProvider_1 = class BulkActionsProvider {
-    constructor(databaseConnectionService, analyticsService) {
-        this.databaseConnectionService = databaseConnectionService;
-        this.analyticsService = analyticsService;
+    constructor(databaseClientFactory, analytics) {
+        this.databaseClientFactory = databaseClientFactory;
+        this.analytics = analytics;
         this.bulkActions = new Map();
         this.logger = new common_1.Logger('BulkActionsProvider');
     }
@@ -29,10 +29,13 @@ let BulkActionsProvider = BulkActionsProvider_1 = class BulkActionsProvider {
         if (this.bulkActions.get(dto.id)) {
             throw new Error('You already have bulk action with such id');
         }
-        const bulkAction = new bulk_action_1.BulkAction(dto.id, dto.databaseId, dto.type, dto.filter, socket, this.analyticsService);
+        const bulkAction = new bulk_action_1.BulkAction(dto.id, dto.databaseId, dto.type, dto.filter, socket, this.analytics);
         this.bulkActions.set(dto.id, bulkAction);
-        const client = await this.databaseConnectionService.getOrCreateClient({
-            sessionMetadata: undefined,
+        const client = await this.databaseClientFactory.getOrCreateClient({
+            sessionMetadata: {
+                userId: '1',
+                sessionId: '1',
+            },
             databaseId: dto.databaseId,
             context: models_1.ClientContext.Common,
             db: dto.db,
@@ -80,7 +83,7 @@ let BulkActionsProvider = BulkActionsProvider_1 = class BulkActionsProvider {
 };
 BulkActionsProvider = BulkActionsProvider_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [database_connection_service_1.DatabaseConnectionService,
-        bulk_actions_analytics_service_1.BulkActionsAnalyticsService])
+    __metadata("design:paramtypes", [database_client_factory_1.DatabaseClientFactory,
+        bulk_actions_analytics_1.BulkActionsAnalytics])
 ], BulkActionsProvider);
 exports.BulkActionsProvider = BulkActionsProvider;

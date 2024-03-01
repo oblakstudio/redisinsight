@@ -18,7 +18,9 @@ const class_validator_1 = require("class-validator");
 let CommandExecutionEntity = class CommandExecutionEntity {
     constructor(entity) {
         this.mode = create_command_execution_dto_1.RunQueryMode.ASCII;
+        this.role = null;
         this.resultsMode = create_command_execution_dto_1.ResultsMode.Default;
+        this.nodeOptions = null;
         Object.assign(this, entity);
     }
 };

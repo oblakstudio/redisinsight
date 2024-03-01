@@ -13,11 +13,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisConnectionMiddleware = void 0;
 const common_1 = require("@nestjs/common");
 const error_messages_1 = require("../constants/error-messages");
-const redis_service_1 = require("../modules/redis/redis.service");
 const database_service_1 = require("../modules/database/database.service");
 let RedisConnectionMiddleware = RedisConnectionMiddleware_1 = class RedisConnectionMiddleware {
-    constructor(redisService, databaseService) {
-        this.redisService = redisService;
+    constructor(databaseService) {
         this.databaseService = databaseService;
         this.logger = new common_1.Logger('RedisConnectionMiddleware');
     }
@@ -43,7 +41,6 @@ let RedisConnectionMiddleware = RedisConnectionMiddleware_1 = class RedisConnect
 };
 RedisConnectionMiddleware = RedisConnectionMiddleware_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [redis_service_1.RedisService,
-        database_service_1.DatabaseService])
+    __metadata("design:paramtypes", [database_service_1.DatabaseService])
 ], RedisConnectionMiddleware);
 exports.RedisConnectionMiddleware = RedisConnectionMiddleware;

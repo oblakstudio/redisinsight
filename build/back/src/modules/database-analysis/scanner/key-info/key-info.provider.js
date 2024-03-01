@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeyInfoProvider = void 0;
 const common_1 = require("@nestjs/common");
-const dto_1 = require("../../../browser/dto");
+const dto_1 = require("../../../browser/keys/dto");
 const strategies_1 = require("./strategies");
 let KeyInfoProvider = class KeyInfoProvider {
     constructor() {

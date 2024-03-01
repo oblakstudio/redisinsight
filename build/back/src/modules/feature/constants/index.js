@@ -27,4 +27,5 @@ var KnownFeatures;
     KnownFeatures["CloudSso"] = "cloudSso";
     KnownFeatures["CloudSsoRecommendedSettings"] = "cloudSsoRecommendedSettings";
     KnownFeatures["RedisModuleFilter"] = "redisModuleFilter";
+    KnownFeatures["RedisClient"] = "redisClient";
 })(KnownFeatures = exports.KnownFeatures || (exports.KnownFeatures = {}));

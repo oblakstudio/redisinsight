@@ -1,5 +1,3 @@
-## Create JSON documents
-
 Here's a query that creates a JSON document describing a single bike.
 
 ```redis:[run_confirmation=true] Create a JSON document

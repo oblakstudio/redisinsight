@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisObserver = void 0;
-const IORedis = require("ioredis");
 const common_1 = require("@nestjs/common");
 const constants_1 = require("../../../constants");
 const constants_2 = require("../constants");
@@ -115,12 +114,7 @@ class RedisObserver extends event_emitter_1.EventEmitter2 {
     async connect() {
         var _a;
         try {
-            if (this.redis instanceof IORedis.Cluster) {
-                this.shardsObservers = await Promise.all(this.redis.nodes('all').filter((node) => node.status === 'ready').map(RedisObserver.createShardObserver));
-            }
-            else {
-                this.shardsObservers = [await RedisObserver.createShardObserver(this.redis)];
-            }
+            this.shardsObservers = await Promise.all((await this.redis.nodes()).map(RedisObserver.createShardObserver));
             this.shardsObservers.forEach((observer) => {
                 observer.on('error', (e) => {
                     this.logger.error('Error on shard observer', e);

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompressionForListStrategy = void 0;
 const abstract_recommendation_strategy_1 = require("./abstract.recommendation.strategy");
-const dto_1 = require("../../../browser/dto");
+const dto_1 = require("../../../browser/keys/dto");
 const constants_1 = require("../../../../common/constants");
 class CompressionForListStrategy extends abstract_recommendation_strategy_1.AbstractRecommendationStrategy {
     async isRecommendationReached(key) {

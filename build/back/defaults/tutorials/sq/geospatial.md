@@ -1,10 +1,3 @@
----
-title: "Geospatial queries"
-linkTitle: "Geospatial"
-description: Query based on geographic data
-weight: 4
----
-
 Redis Stack's geospatial feature allows you to query for data associated with geographic locations. You can either query for locations within a specific radius or based on geometric shapes, such as polygons. A polygon shape could, for instance, represent a lake or the layout of a building.
 
 The examples in this article use the following schema:

@@ -32,7 +32,7 @@ let CliController = class CliController {
         return this.service.sendCommand(clientMetadata, dto);
     }
     async sendClusterCommand(clientMetadata, dto) {
-        return this.service.sendClusterCommand(clientMetadata, dto);
+        return this.service.sendCommand(clientMetadata, dto);
     }
     async deleteClient(clientMetadata) {
         return this.service.deleteClient(clientMetadata);
@@ -91,7 +91,7 @@ __decorate([
             {
                 status: 200,
                 description: 'Redis CLI command response',
-                type: cli_dto_1.SendClusterCommandResponse,
+                type: cli_dto_1.SendCommandResponse,
                 isArray: true,
             },
         ],
@@ -100,7 +100,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [models_1.ClientMetadata,
-        cli_dto_1.SendClusterCommandDto]),
+        cli_dto_1.SendCommandDto]),
     __metadata("design:returntype", Promise)
 ], CliController.prototype, "sendClusterCommand", null);
 __decorate([

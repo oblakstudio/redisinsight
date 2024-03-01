@@ -10,13 +10,12 @@ exports.CliModule = void 0;
 const common_1 = require("@nestjs/common");
 const nest_router_1 = require("nest-router");
 const redis_connection_middleware_1 = require("../../middleware/redis-connection.middleware");
-const redis_tool_service_1 = require("../redis/redis-tool.service");
-const redis_tool_factory_1 = require("../redis/redis-tool.factory");
 const commands_module_1 = require("../commands/commands.module");
 const commands_service_1 = require("../commands/commands.service");
 const commands_json_provider_1 = require("../commands/commands-json.provider");
-const models_1 = require("../../common/models");
 const config_1 = require("../../utils/config");
+const database_client_factory_1 = require("../database/providers/database.client.factory");
+const database_analytics_1 = require("../database/database.analytics");
 const cli_controller_1 = require("./controllers/cli.controller");
 const cli_business_service_1 = require("./services/cli-business/cli-business.service");
 const cli_analytics_service_1 = require("./services/cli-analytics/cli-analytics.service");
@@ -36,14 +35,11 @@ CliModule = __decorate([
             cli_business_service_1.CliBusinessService,
             cli_analytics_service_1.CliAnalyticsService,
             {
-                provide: redis_tool_service_1.RedisToolService,
-                useFactory: (redisToolFactory) => redisToolFactory.createRedisTool(models_1.ClientContext.CLI, { enableAutoConnection: false }),
-                inject: [redis_tool_factory_1.RedisToolFactory],
-            },
-            {
                 provide: commands_service_1.CommandsService,
                 useFactory: () => new commands_service_1.CommandsService(COMMANDS_CONFIGS.map(({ name, url }) => new commands_json_provider_1.CommandsJsonProvider(name, url))),
             },
+            database_client_factory_1.DatabaseClientFactory,
+            database_analytics_1.DatabaseAnalytics,
         ],
     })
 ], CliModule);

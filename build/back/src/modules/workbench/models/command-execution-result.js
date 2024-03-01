@@ -12,17 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandExecutionResult = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const cli_dto_1 = require("../../cli/dto/cli.dto");
-const models_1 = require("../../../common/models");
-class ClusterNode extends models_1.Endpoint {
-}
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Cluster node slot.',
-        type: Number,
-        example: 0,
-    }),
-    __metadata("design:type", Number)
-], ClusterNode.prototype, "slot", void 0);
 class CommandExecutionResult {
     constructor(partial = {}) {
         Object.assign(this, partial);
@@ -43,11 +32,4 @@ __decorate([
     }),
     __metadata("design:type", Object)
 ], CommandExecutionResult.prototype, "response", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: () => ClusterNode,
-        description: 'Redis Cluster Node info',
-    }),
-    __metadata("design:type", ClusterNode)
-], CommandExecutionResult.prototype, "node", void 0);
 exports.CommandExecutionResult = CommandExecutionResult;

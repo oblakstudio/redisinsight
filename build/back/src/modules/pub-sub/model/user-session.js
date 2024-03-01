@@ -12,8 +12,8 @@ class UserSession {
         this.id = userClient.getId();
         this.userClient = userClient;
         this.redisClient = redisClient;
-        redisClient.on(constants_1.RedisClientEvents.Message, this.handleMessage.bind(this));
-        redisClient.on(constants_1.RedisClientEvents.End, this.handleDisconnect.bind(this));
+        redisClient.on(constants_1.RedisClientSubscriberEvents.Message, this.handleMessage.bind(this));
+        redisClient.on(constants_1.RedisClientSubscriberEvents.End, this.handleDisconnect.bind(this));
     }
     getId() { return this.id; }
     getUserClient() { return this.userClient; }

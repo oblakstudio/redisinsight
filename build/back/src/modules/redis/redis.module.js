@@ -8,22 +8,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisModule = void 0;
 const common_1 = require("@nestjs/common");
-const redis_tool_factory_1 = require("./redis-tool.factory");
-const redis_service_1 = require("./redis.service");
-const redis_connection_factory_1 = require("./redis-connection.factory");
+const redis_client_factory_1 = require("./redis.client.factory");
+const ioredis_redis_connection_strategy_1 = require("./connection/ioredis.redis.connection.strategy");
+const node_redis_connection_strategy_1 = require("./connection/node.redis.connection.strategy");
+const redis_client_storage_1 = require("./redis.client.storage");
 let RedisModule = class RedisModule {
 };
 RedisModule = __decorate([
     (0, common_1.Module)({
         providers: [
-            redis_service_1.RedisService,
-            redis_tool_factory_1.RedisToolFactory,
-            redis_connection_factory_1.RedisConnectionFactory,
+            redis_client_storage_1.RedisClientStorage,
+            redis_client_factory_1.RedisClientFactory,
+            ioredis_redis_connection_strategy_1.IoredisRedisConnectionStrategy,
+            node_redis_connection_strategy_1.NodeRedisConnectionStrategy,
         ],
         exports: [
-            redis_service_1.RedisService,
-            redis_tool_factory_1.RedisToolFactory,
-            redis_connection_factory_1.RedisConnectionFactory,
+            redis_client_storage_1.RedisClientStorage,
+            redis_client_factory_1.RedisClientFactory,
         ],
     })
 ], RedisModule);

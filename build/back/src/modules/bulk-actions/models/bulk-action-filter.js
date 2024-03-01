@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BulkActionFilter = void 0;
-const dto_1 = require("../../browser/dto");
+const dto_1 = require("../../browser/keys/dto");
 const class_validator_1 = require("class-validator");
 class BulkActionFilter {
     constructor() {

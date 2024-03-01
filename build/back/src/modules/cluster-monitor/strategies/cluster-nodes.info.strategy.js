@@ -2,13 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClusterNodesInfoStrategy = void 0;
 const abstract_info_strategy_1 = require("./abstract.info.strategy");
-const ioredis_1 = require("ioredis");
 const models_1 = require("../models");
 class ClusterNodesInfoStrategy extends abstract_info_strategy_1.AbstractInfoStrategy {
     async getClusterNodesFromRedis(client) {
-        const resp = await client.sendCommand(new ioredis_1.Command('cluster', ['nodes'], {
-            replyEncoding: 'utf8',
-        }));
+        const resp = await client.sendCommand(['cluster', 'nodes'], { replyEncoding: 'utf8' });
         return resp.split('\n').filter((e) => e).map((nodeString) => {
             const [id, endpoint, flags, primary, , , , , ...slots] = nodeString.split(' ');
             const [host, ports] = endpoint.split(':');

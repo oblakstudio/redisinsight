@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mockGetListElementResponse = exports.mockGetListElementsResponse = exports.mockDeleteElementsDto = exports.mockSetListElementDto = exports.mockGetListElementsDto = exports.mockPushElementDto = exports.mockListElements = exports.mockListElement2 = exports.mockListElement = exports.mockIndex = void 0;
-const dto_1 = require("../dto");
+const dto_1 = require("../list/dto");
 const keys_1 = require("./keys");
 exports.mockIndex = 0;
 exports.mockListElement = Buffer.from('Lorem ipsum dolor sit amet.');

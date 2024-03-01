@@ -17,12 +17,12 @@ const config_1 = require("../../utils/config");
 const settings_service_1 = require("../settings/settings.service");
 const database_service_1 = require("../database/database.service");
 const models_1 = require("../../common/models");
-const redis_connection_factory_1 = require("../redis/redis-connection.factory");
+const redis_client_factory_1 = require("../redis/redis.client.factory");
 const SERVER_CONFIG = config_1.default.get('server');
 let AutodiscoveryService = class AutodiscoveryService {
-    constructor(settingsService, redisConnectionFactory, databaseService) {
+    constructor(settingsService, redisClientFactory, databaseService) {
         this.settingsService = settingsService;
-        this.redisConnectionFactory = redisConnectionFactory;
+        this.redisClientFactory = redisClientFactory;
         this.databaseService = databaseService;
         this.logger = new common_1.Logger('AutoDiscoveryService');
     }
@@ -54,10 +54,10 @@ let AutodiscoveryService = class AutodiscoveryService {
     async addRedisDatabase(endpoint) {
         var _a;
         try {
-            const client = await this.redisConnectionFactory.createStandaloneConnection({
+            const client = await this.redisClientFactory.createClient({
                 context: models_1.ClientContext.Common,
             }, endpoint, { useRetry: false, connectionName: 'redisinsight-auto-discovery' });
-            const info = (0, utils_1.convertRedisInfoReplyToObject)(await client.info());
+            const info = (0, utils_1.convertRedisInfoReplyToObject)(await client.sendCommand(['info'], { replyEncoding: 'utf8' }));
             if (((_a = info === null || info === void 0 ? void 0 : info.server) === null || _a === void 0 ? void 0 : _a.redis_mode) === 'standalone') {
                 await this.databaseService.create({
                     name: `${endpoint.host}:${endpoint.port}`,
@@ -72,7 +72,7 @@ let AutodiscoveryService = class AutodiscoveryService {
 AutodiscoveryService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [settings_service_1.SettingsService,
-        redis_connection_factory_1.RedisConnectionFactory,
+        redis_client_factory_1.RedisClientFactory,
         database_service_1.DatabaseService])
 ], AutodiscoveryService);
 exports.AutodiscoveryService = AutodiscoveryService;

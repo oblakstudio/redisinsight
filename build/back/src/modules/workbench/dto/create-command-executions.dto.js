@@ -12,8 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCommandExecutionsDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-const class_transformer_1 = require("class-transformer");
-const cli_dto_1 = require("../../cli/dto/cli.dto");
 const create_command_execution_dto_1 = require("./create-command-execution.dto");
 class CreateCommandExecutionsDto {
     constructor() {
@@ -51,27 +49,4 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], CreateCommandExecutionsDto.prototype, "resultsMode", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Execute command for nodes with defined role',
-        default: create_command_execution_dto_1.ClusterNodeRole.All,
-        enum: create_command_execution_dto_1.ClusterNodeRole,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(create_command_execution_dto_1.ClusterNodeRole, {
-        message: `role must be a valid enum value. Valid values: ${Object.values(create_command_execution_dto_1.ClusterNodeRole)}.`,
-    }),
-    __metadata("design:type", String)
-], CreateCommandExecutionsDto.prototype, "role", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Should be provided if only one node needs to execute the command.',
-        type: cli_dto_1.ClusterSingleNodeOptions,
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmptyObject)(),
-    (0, class_transformer_1.Type)(() => cli_dto_1.ClusterSingleNodeOptions),
-    (0, class_validator_1.ValidateNested)(),
-    __metadata("design:type", cli_dto_1.ClusterSingleNodeOptions)
-], CreateCommandExecutionsDto.prototype, "nodeOptions", void 0);
 exports.CreateCommandExecutionsDto = CreateCommandExecutionsDto;

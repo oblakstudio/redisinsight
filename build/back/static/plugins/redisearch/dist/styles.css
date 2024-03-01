@@ -261,8 +261,7 @@
 .eui-yScroll {
   scrollbar-width: thin;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
 }
 
 .eui-yScroll::-webkit-scrollbar {
@@ -276,7 +275,11 @@
   border: 6px solid #0000;
 }
 
-.eui-yScroll::-webkit-scrollbar-corner, .eui-yScroll::-webkit-scrollbar-track {
+.eui-yScroll::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.eui-yScroll::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
@@ -304,7 +307,11 @@
   border: 6px solid #0000;
 }
 
-.eui-xScroll::-webkit-scrollbar-corner, .eui-xScroll::-webkit-scrollbar-track {
+.eui-xScroll::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.eui-xScroll::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
@@ -319,8 +326,7 @@
 .eui-yScrollWithShadows {
   scrollbar-width: thin;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   -webkit-mask-image: linear-gradient(#ff00001a 0%, red 7.5px calc(100% - 7.5px), #ff00001a 100%);
   mask-image: linear-gradient(#ff00001a 0%, red 7.5px calc(100% - 7.5px), #ff00001a 100%);
 }
@@ -336,7 +342,11 @@
   border: 6px solid #0000;
 }
 
-.eui-yScrollWithShadows::-webkit-scrollbar-corner, .eui-yScrollWithShadows::-webkit-scrollbar-track {
+.eui-yScrollWithShadows::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.eui-yScrollWithShadows::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
@@ -366,7 +376,11 @@
   border: 6px solid #0000;
 }
 
-.eui-xScrollWithShadows::-webkit-scrollbar-corner, .eui-xScrollWithShadows::-webkit-scrollbar-track {
+.eui-xScrollWithShadows::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.eui-xScrollWithShadows::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
@@ -381,8 +395,7 @@
 .euiYScrollWithShadows {
   scrollbar-width: thin;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   -webkit-mask-image: linear-gradient(#ff00001a 0%, red 7.5px calc(100% - 7.5px), #ff00001a 100%);
   mask-image: linear-gradient(#ff00001a 0%, red 7.5px calc(100% - 7.5px), #ff00001a 100%);
 }
@@ -398,7 +411,11 @@
   border: 6px solid #0000;
 }
 
-.euiYScrollWithShadows::-webkit-scrollbar-corner, .euiYScrollWithShadows::-webkit-scrollbar-track {
+.euiYScrollWithShadows::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.euiYScrollWithShadows::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
@@ -415,8 +432,8 @@
 }
 
 .eui-fullHeight {
-  height: 100%;
   flex: auto;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -463,8 +480,8 @@ html {
   -ms-text-size-adjust: 100%;
   font-kerning: normal;
   color: #343741;
-  height: 100%;
   background-color: #fafbfd;
+  height: 100%;
   font-family: Inter UI, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
   font-size: 16px;
   font-weight: 400;
@@ -573,7 +590,6 @@ html {
 
 .container {
   scrollbar-width: thin;
-  max-height: 810px;
   white-space: pre-wrap;
   word-break: break-all;
   text-align: left;
@@ -582,6 +598,7 @@ html {
   background-color: var(--euiPageBackgroundColor);
   z-index: 10;
   flex: auto;
+  max-height: 810px;
   padding: 16px 20px;
   font: 13px / 18px Graphik, sans-serif;
   overflow: auto;
@@ -598,7 +615,11 @@ html {
   border: 6px solid #0000;
 }
 
-.container::-webkit-scrollbar-corner, .container::-webkit-scrollbar-track {
+.container::-webkit-scrollbar-corner {
+  background-color: #0000;
+}
+
+.container::-webkit-scrollbar-track {
   background-color: #0000;
 }
 
