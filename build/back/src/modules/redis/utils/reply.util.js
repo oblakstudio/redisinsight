@@ -2,9 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseNodesFromClusterInfoReply = exports.convertMultilineReplyToObject = exports.convertArrayReplyToObject = void 0;
 const lodash_1 = require("lodash");
-const convertArrayReplyToObject = (input) => (0, lodash_1.chunk)(input, 2).reduce((prev, current) => {
+const convertArrayReplyToObject = (input, options = {}) => (0, lodash_1.chunk)(input, 2).reduce((prev, current) => {
     const [key, value] = current;
-    return { ...prev, [key.toLowerCase()]: value };
+    return {
+        ...prev,
+        [key.toString().toLowerCase()]: options.utf && !(0, lodash_1.isArray)(value) ? value === null || value === void 0 ? void 0 : value.toString() : value,
+    };
 }, {});
 exports.convertArrayReplyToObject = convertArrayReplyToObject;
 const convertMultilineReplyToObject = (info, lineSeparator = '\r\n', valueSeparator = ':') => {

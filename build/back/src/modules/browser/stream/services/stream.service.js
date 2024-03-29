@@ -21,6 +21,7 @@ const constants_1 = require("../../../../constants");
 const class_transformer_1 = require("class-transformer");
 const database_client_factory_1 = require("../../../database/providers/database.client.factory");
 const utils_2 = require("../../utils");
+const utils_3 = require("../../../redis/utils");
 let StreamService = StreamService_1 = class StreamService {
     constructor(databaseClientFactory) {
         this.databaseClientFactory = databaseClientFactory;
@@ -32,10 +33,10 @@ let StreamService = StreamService_1 = class StreamService {
             const { keyName, sortOrder } = dto;
             const client = await this.databaseClientFactory.getOrCreateClient(clientMetadata);
             await (0, utils_2.checkIfKeyNotExists)(keyName, client);
-            const info = await client.sendCommand([
+            const info = (0, utils_3.convertArrayReplyToObject)(await client.sendCommand([
                 browser_tool_commands_1.BrowserToolStreamCommands.XInfoStream,
                 keyName,
-            ]);
+            ]));
             let entries = [];
             if (sortOrder && sortOrder === sort_1.SortOrder.Asc) {
                 entries = await this.getRange(client, dto);
@@ -46,10 +47,10 @@ let StreamService = StreamService_1 = class StreamService {
             this.logger.log('Succeed to get entries from the stream.');
             return (0, class_transformer_1.plainToClass)(dto_1.GetStreamEntriesResponse, {
                 keyName,
-                total: info[1],
-                lastGeneratedId: info[7].toString(),
-                firstEntry: StreamService_1.formatArrayToDto(info[11]),
-                lastEntry: StreamService_1.formatArrayToDto(info[13]),
+                total: info['length'],
+                lastGeneratedId: info['last-generated-id'].toString(),
+                firstEntry: StreamService_1.formatArrayToDto(info['first-entry']),
+                lastEntry: StreamService_1.formatArrayToDto(info['last-entry']),
                 entries,
             });
         }

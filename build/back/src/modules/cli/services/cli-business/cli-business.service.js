@@ -24,6 +24,7 @@ const client_not_found_error_exception_1 = require("../../../redis/exceptions/cl
 const database_recommendation_service_1 = require("../../../database-recommendation/database-recommendation.service");
 const database_client_factory_1 = require("../../../database/providers/database.client.factory");
 const uuid_1 = require("uuid");
+const utils_1 = require("../../../../utils");
 const output_formatter_manager_1 = require("./output-formatter/output-formatter-manager");
 const output_formatter_interface_1 = require("./output-formatter/output-formatter.interface");
 const text_formatter_strategy_1 = require("./output-formatter/strategies/text-formatter.strategy");
@@ -109,6 +110,9 @@ let CliBusinessService = class CliBusinessService {
                 command,
                 outputFormat,
             });
+            if (command.toLowerCase() === 'ft.info') {
+                this.cliAnalyticsService.sendIndexInfoEvent(clientMetadata.databaseId, (0, utils_1.getAnalyticsDataFromIndexInfo)(reply));
+            }
             this.logger.log('Succeed to execute redis CLI command.');
             return {
                 response: formatter.format(reply),

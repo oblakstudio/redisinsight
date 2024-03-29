@@ -22,6 +22,19 @@ let WorkbenchAnalyticsService = class WorkbenchAnalyticsService extends command_
         this.eventEmitter = eventEmitter;
         this.commandsService = commandsService;
     }
+    sendIndexInfoEvent(databaseId, additionalData) {
+        if (!additionalData) {
+            return;
+        }
+        try {
+            this.sendEvent(constants_1.TelemetryEvents.WorkbenchIndexInfoSubmitted, {
+                databaseId,
+                ...additionalData,
+            });
+        }
+        catch (e) {
+        }
+    }
     async sendCommandExecutedEvents(databaseId, results, additionalData = {}) {
         try {
             await Promise.all(results.map((result) => this.sendCommandExecutedEvent(databaseId, result, additionalData)));

@@ -83,7 +83,7 @@ FT.SEARCH idx:bicycle "@price:[(1000 +inf]"
 The example below returns bicycles with a price lower than or equal to 2000 USD (`price <= 2000`) by returning the five cheapest bikes:
 
 ```redis Range query 4
-FT.SEARCH idx:bicycle "@price:[-inf 2000] SORTBY price LIMIT 0 5"
+FT.SEARCH idx:bicycle "@price:[-inf 2000]" SORTBY price LIMIT 0 5
 ```
 
 ## Non-numeric range queries

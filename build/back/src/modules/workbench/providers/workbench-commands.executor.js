@@ -17,6 +17,7 @@ const errors_1 = require("../../cli/constants/errors");
 const constants_1 = require("../../../constants");
 const create_command_execution_dto_1 = require("../dto/create-command-execution.dto");
 const transformers_1 = require("../../../common/transformers");
+const utils_1 = require("../../../utils");
 const workbench_analytics_service_1 = require("../services/workbench-analytics/workbench-analytics.service");
 let WorkbenchCommandsExecutor = class WorkbenchCommandsExecutor {
     constructor(analyticsService) {
@@ -39,6 +40,9 @@ let WorkbenchCommandsExecutor = class WorkbenchCommandsExecutor {
             const result = [{ response, status: cli_dto_1.CommandExecutionStatus.Success }];
             this.logger.log('Succeed to execute workbench command.');
             this.analyticsService.sendCommandExecutedEvents(client.clientMetadata.databaseId, result, { command, rawMode: mode === create_command_execution_dto_1.RunQueryMode.Raw });
+            if (command.toLowerCase() === 'ft.info') {
+                this.analyticsService.sendIndexInfoEvent(client.clientMetadata.databaseId, (0, utils_1.getAnalyticsDataFromIndexInfo)(response));
+            }
             return result;
         }
         catch (error) {

@@ -52,6 +52,19 @@ let CliAnalyticsService = class CliAnalyticsService extends command_telemetry_ba
         catch (e) {
         }
     }
+    sendIndexInfoEvent(databaseId, additionalData) {
+        if (!additionalData) {
+            return;
+        }
+        try {
+            this.sendEvent(constants_1.TelemetryEvents.CliIndexInfoSubmitted, {
+                databaseId,
+                ...additionalData,
+            });
+        }
+        catch (e) {
+        }
+    }
     async sendCommandExecutedEvent(databaseId, additionalData = {}) {
         try {
             this.sendEvent(constants_1.TelemetryEvents.CliCommandExecuted, {

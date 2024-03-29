@@ -5,7 +5,7 @@ const SWAGGER_CONFIG = {
     info: {
         title: 'RedisInsight Backend API',
         description: 'RedisInsight Backend API',
-        version: '2.44.0',
+        version: '2.46.0',
     },
     tags: [],
 };
